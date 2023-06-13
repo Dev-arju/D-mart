@@ -1,0 +1,251 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+
+<!-- Hero Section Begin -->
+<section class="hero ">
+	<div class="container">
+		<div class="row pt-4 pb-2">
+			<div class="col">
+				<div class="hero__item set-bg d-flex justify-content-end " data-setbg="/images/banner/banner_digimart.jpg"
+                        style="background-size: cover;">
+					<div class="hero__text float-right">
+						<span>A COMPLETE DIGITAL STORE</span>
+						<h2>Mobiles<br />Laptops</h2>
+						<p>100% Genuine products</p>
+						<a href="/shop" class="primary-btn" >SHOP NOW</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- Hero Section End -->
+
+<!-- Categories Section Begin -->
+<section class="categories">
+	<div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title">
+                    <h2>Categories</h2>
+                </div>
+            </div>
+        </div>
+		<div class="row">
+			<div class="categories__slider owl-carousel">
+				<% if (locals.categories) { %>
+					<% categories.forEach(category => { %>
+						<div class="col-lg-3">
+							<div class="categories__item set-bg" style="background-size: cover;" data-setbg="/images/category/<%= category.imagename %>">
+								<h5><a href="#"><%= category.name %></a></h5>
+							</div>
+						</div>
+					<% }); %>
+				<% } %>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- Categories Section End -->
+
+    <!-- Featured Section Begin -->
+    <section class="featured spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title">
+                        <h2>Featured Product</h2>
+                    </div>
+                    <div class="featured__controls">
+                        <ul>
+                            <li class="active" data-filter="*">All</li>
+                            <% categories.forEach(category => { %>
+                                <li data-filter=".<%= category.name %>"><%= category.name %></li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row featured__filter">
+
+                <% for( let i = 0; i < featured.length; i++ ) { %>
+                    <% for( let j = 0; j < featured[i].products.length; j++ ) { %>
+                        <% if (j === 4 ) { %>
+                         <% break %>
+                        <% } %>
+                        <div class="col-lg-3 col-md-4 col-sm-6 mix <%= featured[i].name %>">
+                            <div class="featured__item">
+                                <div class="featured__item__pic set-bg" data-setbg="/images/product/<%= featured[i].products[j].images[0] %>">
+                                    <div class="border rounded-circle bg-danger text-center p-2" 
+                                        style="width: 50px;height: 50px; line-height: 1;">
+                                        <span class="text-white text-center">
+                                            <%= featured[i].products[j].deal %>&#37; off
+                                        </span>
+                                    </div>
+                                    <ul class="featured__item__pic__hover ">
+                                            <li><a onclick="addWishlist('<%= featured[i].products[j]._id %>')"><i class="fa fa-heart"></i></a></li>
+                                            <li><a class="add-to-cart" onclick="addCart('<%= featured[i].products[j]._id %>')"><i class="fa fa-shopping-cart"></i></a></li>
+                                    </ul>
+                                </div>
+                                <div class="featured__item__text">
+                                    <h6><a href="/product/<%= featured[i].products[j]._id %>"><%= featured[i].products[j].productName %></a></h6>
+                                    <h5>&#8377; <%= Math.floor(featured[i].products[j].price - (featured[i].products[j].price * (featured[i].products[j].deal / 100))) %></h5>
+                                    <p style="text-decoration: line-through;">&#8377; <%= featured[i].products[j].price %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } %>
+    </section>
+    <!-- Featured Section End -->
+
+
+    <!-- Banner Begin -->
+    <div class="banner">
+        <div class="container">
+            <div class="row">
+                <div class="col section-title">
+                    <h2>Deals and Offers</h2>
+                </div>
+            </div>
+            <div class="row">
+                <% if (locals.banner) { %>
+                 <% for( let i = 0; i < banner.length; i++ ) { %>
+                    <div class="col-lg-6">
+                        <div class="banner__pic d-flex justify-content-center">
+                            <img src="/images/banner/<%= banner[i].imgName %>" alt="" style="object-fit: fill;">
+                        </div>
+                    </div>
+                 <% } %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <!-- Banner End -->
+
+
+
+    <!-- Latest Product Section Begin -->
+    <section class="latest-product spad">
+        <div class="container">
+            <div class="row">
+                <div class="col section-title">
+                    <h2>Favorate Brands</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="latest-product__text">
+                        <h4>Samsung</h4>
+                        <span></span>
+                        <div class="latest-prdouct__slider__item">
+                            <% samsung.forEach(product => { %>
+                                <a href="/product/<%= product._id %>" class="latest-product__item">
+                                    <div class="latest-product__item__pic">
+                                        <img src="/images/product/<%= product.images[0] %>" alt="">
+                                    </div>
+                                    <div class="latest-product__item__text">
+                                        <h6><%= product.productName %></h6>
+                                        <span>&#8377; <%= Math.floor(product.price - (product.price * (product.deal / 100))) %></span>
+                                        <p style="text-decoration: line-through;">&#8377; <%= product.price %></p>
+                                    </div>
+                                </a>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="latest-product__text">
+                        <h4>Apple</h4>
+                        <span></span>
+                        <div class="latest-prdouct__slider__item">
+                            <% apple.forEach(product => { %>
+                                <a href="/product/<%= product._id %>" class="latest-product__item">
+                                    <div class="latest-product__item__pic">
+                                        <img src="/images/product/<%= product.images[0] %>" alt="">
+                                    </div>
+                                    <div class="latest-product__item__text">
+                                        <h6><%= product.productName %></h6>
+                                        <span>&#8377; <%= Math.floor(product.price - (product.price * (product.deal / 100))) %></span>
+                                        <p style="text-decoration: line-through;">&#8377; <%= product.price %></p>
+                                    </div>
+                                </a>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="latest-product__text">
+                        <h4>Sony</h4>
+                        <span></span>
+                        <div class="latest-prdouct__slider__item">
+                            <% sony.forEach(product => { %>
+                                <a href="/product/<%= product._id %>" class="latest-product__item">
+                                    <div class="latest-product__item__pic">
+                                        <img src="/images/product/<%= product.images[0] %>" alt="">
+                                    </div>
+                                    <div class="latest-product__item__text">
+                                        <h6><%= product.productName %></h6>
+                                        <span>&#8377; <%= Math.floor(product.price - (product.price * (product.deal / 100))) %></span>
+                                        <p style="text-decoration: line-through;">&#8377; <%= product.price %></p>
+                                    </div>
+                                </a>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Latest Product Section End -->
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script>
+        function addCart(productId){
+
+            $.ajax({
+                url: "/add-to-cart",
+                method: "POST",
+                data: {productId},
+                success: function(response){
+                    if($('#cartCount').hasClass('d-none')){
+                        $('#cartCount').removeClass('d-none')
+                    }
+                    $('#cartCount').html(response.cartCount)
+                    console.log(response.cartCount);
+                    Swal.fire({
+                        title: response.title,
+                        text: response.text,
+                        icon: response.icon
+                    })
+                },
+                error: function (error){
+                    console.log(error);
+                }
+            })
+        }
+        function addWishlist(productId){
+            $.ajax({
+                url: '/add-to-wishlist',
+                method: 'post',
+                data: {productId},
+                success: (response) =>{
+                    Swal.fire({
+                        title: response.title,
+                        text: response.text,
+                        icon: response.icon
+                    })
+                },
+                error: (err) => {
+                    console.log(err);
+                }
+            })
+        }
+    </script>
+
+<%- include('../includes/footer') %>
+<%- include('../includes/foot') %>

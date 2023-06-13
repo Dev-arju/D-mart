@@ -1,0 +1,50 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+<style>
+    @keyframes tick {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    
+    .tick-icon {
+      animation: tick 1s ease-in-out;
+      fill: #28a745;
+      width: 100px;
+      height: 100px;
+    }
+  </style>
+
+<div class="container py-4">
+    <div class="row border rounded border-success d-flex flex-column justify-content-center" style="min-height: 480px;">
+        <div class="col-md-6 offset-md-3 text-center">
+            <svg class="tick-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M9 16.17L5.53 12.7a.996.996 0 1 1 1.41-1.41l2.83 2.83L18.3 6.7a.996.996 0 1 1 1.41 1.41L9 16.17z"/>
+            </svg>
+        </div>
+        <div class="col-md-6 offset-md-3 mb-5 text-center">
+            <h2><strong>Order placed</strong></h2>
+        </div>
+        <div class="col-md-6 offset-md-3 d-flex justify-content-around">
+            <a href="/" class="btn btn-success px-4" >Continue Shopping</a>
+            <a href="/my-orders" class="btn btn-success px-5" >View Orders</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    history.replaceState(null, null, '/');
+    window.onpopstate = function(event) {
+        // Handle the state change event
+        console.log('State changed: ', event.state);
+    };
+
+</script>
+
+  
+  
+
+<%- include('../includes/footer') %>
+<%- include('../includes/foot') %>

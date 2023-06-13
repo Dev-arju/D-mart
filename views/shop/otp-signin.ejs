@@ -1,0 +1,35 @@
+<%- include('../includes/head')  %>
+<%- include('../includes/header') %>
+
+<section class="container shadow bg-light my-lg-4 mb-3 py-3 rounded" style="max-width: 380px; width: 100%">
+    <div class="text-center text-dark my-5">
+        <h3 class="py-2">Login With SMS</h3>
+    </div>
+
+    <form action="/signin-otp" method="post" name="otplogin" id="numform">
+
+        <div class="form-group">
+            <label for="mobile" class="form-label m-0">Mobile Number</label>
+            <div class="input-group">
+                <div class="input-group-prepend"><span class="input-group-text" id="mob-addon">+91</span></div>
+                <input type="text" id="mobile" name="number" class="form-control" aria-describedby="mob-addon">
+            </div>
+            <span class="text-danger d-none" style="font-size: 12px; margin-left: 10px;" id="mobError"></span>
+        </div>
+
+        <div class="d-flex justify-content-center my-3">
+            <button class="btn shadow btn-info rounded-pill text-center px-5" type="submit"><strong>Send
+                    OTP</strong></button>
+        </div>
+    </form>
+
+    <hr>
+
+    <a href="/signin" class="btn btn-info w-100 mb-3">Back to login</a>
+    <h6>Not registered? <a href="/signup">Create an account</a></h6>
+
+</section>
+
+<script src="javascripts/otploginValidation.js"></script>
+
+<%- include('../includes/foot') %>

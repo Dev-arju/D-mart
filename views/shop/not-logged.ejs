@@ -1,0 +1,21 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+<style>
+    .cart-empty h6 a:hover {
+        color: red;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container">
+    <div class="row d-flex align-items-center" style="height: 480px;">
+        <div class="col text-center cart-empty">
+            <h2 class="mb-3">User Not Logged In</h2>
+            <h6><a href="/signin">sign in</a> or <a href="/signup">register</a> an account</h6>
+        </div>
+    </div>
+</div>
+
+<%- include('../includes/footer') %>
+<%- include('../includes/foot') %>

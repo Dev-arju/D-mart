@@ -1,0 +1,127 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+<style>
+    .active{
+    background: #ffff;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin: 10px 0px 20px 10px;
+    border-radius: 20px;
+    }
+    .active a{
+        color: #000;
+    }
+</style>
+
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-lg-3 my-3 p-5 side-menu" style="max-height: 655px;">
+            <div class="d-flex flex-column mt-5">
+                <h4 class="profile-tab active"><a href="/profile">Profile</a></h4>
+                <h4 class="profile-tab "><a href="/address">Address</a></h4>
+                <h4 class="profile-tab"><a href="/wallet">Wallet</a></h4>
+            </div>
+        </div>
+        <div class="col-lg-8 my-3 offset-lg-1 main-section">
+            <div class="row d-flex flex-column flex-wrap align-items-center">
+                <div class="col-md-4 text-center pt-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="128" height="128" viewBox="0 0 64 64">
+                        <circle cx="32" cy="18" r="10" fill="#ffce29"></circle><path fill="#37d0ee" d="M32,28L32,28c-8.284,0-15,6.716-15,15v8c0,1.657,1.343,3,3,3h24c1.657,0,3-1.343,3-3v-8	C47,34.716,40.284,28,32,28z"></path><ellipse cx="32" cy="61" opacity=".3" rx="17" ry="3"></ellipse><path d="M47,43v8c0,1.657-1.343,3-3,3H32c0-2.76,2.24-5,5-5h4c0.552,0,1-0.448,1-1v-5	c0-2.48,1.8-4.54,4.17-4.92C46.71,39.62,47,41.28,47,43z" opacity=".15"></path><path fill="#fff" d="M36.92,28.83C36.54,31.2,34.48,33,32,33c-5.51,0-10,4.49-10,10c0,2.76-2.24,5-5,5v-5	c0-8.28,6.72-15,15-15C33.72,28,35.38,28.29,36.92,28.83z" opacity=".3"></path><path fill="#fff" d="M22.499,38c-0.286,0-0.575-0.081-0.831-0.252c-0.689-0.46-0.876-1.391-0.416-2.08	c1.397-2.096,3.259-3.588,5.691-4.561c0.768-0.307,1.642,0.066,1.949,0.836c0.308,0.769-0.066,1.642-0.836,1.949	c-1.85,0.74-3.259,1.865-4.309,3.439C23.459,37.766,22.983,38,22.499,38z"></path>
+                    </svg>
+                </div>
+                <div class="col-md-4 text-center my-3">
+                    <h4 class="text-uppercase text-secondary" style="font-size: 20px;font-weight: 600;"><%= userDetails.fullname %></h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 py-5 text-center">
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input type="text" class="form-control" id="email" value="<%= userDetails.email %>" disabled>
+                    </div>
+                    <div class="form-group">
+                      <label for="mob">Mobile Number</label>
+                      <input type="text" class="form-control" id="mob" value="<%= userDetails.mobileNumber %>" disabled>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" id="profile-btn" data-status="edit">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<script>
+    const profileBtn = document.getElementById('profile-btn');
+    const emailInput = document.getElementById('email');
+    const mobileInput = document.getElementById('mob');
+
+    profileBtn.addEventListener('click', (event) =>{
+        const status = event.target.dataset.status;
+        if(status === 'edit'){
+            emailInput.removeAttribute('disabled')
+            mobileInput.removeAttribute('disabled')
+            profileBtn.dataset.status = 'save'
+            profileBtn.innerHTML = 'Save'
+        }
+        if(status === 'save'){
+            const valid = validateInput()
+            if(valid){
+                Swal.fire({
+                    title: 'Verify Details',
+                    html: `Email: ${emailInput.value}<br>Mobile: ${mobileInput.value}`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirm'
+                }).then((result) => {
+                    if(result.isConfirmed){
+                        $.ajax({
+                            url: '/change-user-info',
+                            method: 'post',
+                            data: {email: emailInput.value, mobile: mobileInput.value},
+                            success: (res) => {
+                                if(res.updated){
+                                    emailInput.setAttribute('disabled', '')
+                                    mobileInput.setAttribute('disabled', '')
+                                    Swal.fire('details updated successfully')
+                                    profileBtn.dataset.status = 'edit'
+                                    profileBtn.innerHTML = 'Edit'
+                                }else{
+                                    console.log(res.err);
+                                    Swal.fire('Details not updated')
+                                }
+                            }
+                        })
+                    }
+                })
+            }else{
+                Swal.fire({
+                    title: 'Invalid',
+                    text: 'email or mobile number is not valid',
+                    icon: 'warning'
+                })
+            }
+        }
+    })
+
+    function validateInput(){
+        const email = emailInput.value.trim();
+        const mobileNumber = mobileInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const mobileRegex = /^\d{10}$/;
+
+        if(emailRegex.test(email) && mobileRegex.test(mobileNumber)){
+            return true
+        }
+        return false
+    }
+
+</script>
+
+<%- include('../includes/footer') %>
+<%- include('../includes/foot') %>

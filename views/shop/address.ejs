@@ -1,0 +1,405 @@
+<%- include('../includes/head') %>
+    <%- include('../includes/header') %>
+
+    <style>
+        .active{
+        background: #ffff;
+        letter-spacing: 3px;
+        font-weight: 800;
+        margin: 10px 0px 20px 10px;
+        border-radius: 20px;
+        }
+        .active a{
+            color: #000;
+        }
+    </style>
+
+        <section class="container mb-5">
+            <div class="row">
+                <div class="col-lg-3 my-3 p-5 side-menu">
+                    <div class="d-flex flex-column mt-5">
+                        <h4 class="profile-tab "><a href="/profile">Profile</a></h4>
+                        <h4 class="profile-tab active"><a href="/address">Address</a></h4>
+                        <h4 class="profile-tab"><a href="/wallet">Wallet</a></h4>
+                    </div>
+                </div>
+                <div class="col-lg-8 my-3 offset-lg-1" id="main-section">
+                    <div class="row d-flex flex-column flex-wrap align-items-center" id="addressHeader">
+                        <div class="col-md-4 text-center pt-5 mb-4">
+                            <h2 class="text-uppercase text-Dark" id="addressTitle" style="font-size: 26px;font-weight: 800;">
+                                Saved Address</h2>
+                        </div>
+                    </div>
+
+                    <!-- saved address -->
+                    <div class="row justify-content-center" id="savedAddress">
+                        <button class="btn btn-info col-md-10 offset-md-1 my-4" id="addAddressBtn">Add Address</button>
+                        <% if (locals.all) { %>
+                        <% for( let i = 0; i < all.available.length; i++ ) { %>
+                        <div class="col-md-10 offset-md-1 py-4 px-2 bg-white mb-4 border rounded address-list-wrapper">
+                            <div class="row mb-3">
+                                <div class="col offset-1 field">
+                                    <h6>Full Name</h6>
+                                </div>
+                                <div class="col-6 value">
+                                    <h6><%= all.available[i].firstName + " " + all.available[i].lastName %></h6>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col offset-1 field">
+                                    <h6>Address</h6>
+                                </div>
+                                <div class="col-6 value">
+                                    <h6><%= all.available[i].address %></h6>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col offset-1 field">
+                                    <h6>Apartment</h6>
+                                </div>
+                                <div class="col-6 value">
+                                    <h6><%= all.available[i].apartment %></h6>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col offset-1 field">
+                                    <h6>Phone</h6>
+                                </div>
+                                <div class="col-6 value">
+                                    <h6><%= all.available[i].phone %></h6>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col offset-1 field">
+                                    <h6>Email</h6>
+                                </div>
+                                <div class="col-6 value">
+                                    <h6><%= all.available[i].email %></h6>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row text-center ">
+                                <div class="col field">
+                                    <p>country</p>
+                                </div>
+                                <div class="col field">
+                                    <p>state</p>
+                                </div>
+                                <div class="col field">
+                                    <p>postcode</p>
+                                </div>
+                            </div>
+                            <div class="row text-center mb-4">
+                                <div class="col value">
+                                    <p><%= all.available[i].country %></p>
+                                </div>
+                                <div class="col value">
+                                    <p><%= all.available[i].state %></p>
+                                </div>
+                                <div class="col value">
+                                    <p><%= all.available[i].postcode %></p>
+                                </div>
+                            </div>
+                            <div class="row mb-4 d-flex align-items-center">
+                                <div class="col offset-1 field">
+                                    <h6>Address type</h6>
+                                </div>
+                                <div class="col-4 value">
+                                    <h6><%= all.available[i].addressType %></h6>
+                                </div>
+                                <div class="col edit-btn">
+                                    <button onclick="appendEditForm('<%= all.available[i]._id %>')" class="btn btn-primary w-100 float-right mr-5">Edit</button>
+                                </div>
+                                <div class="col delete-btn">
+                                    <button class="btn btn-danger w-100 float-right mr-5" data-id="<%= all.available[i]._id %>" onclick="deleteAddress(this)">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                        <% } %>
+                    </div>
+                    <!-- !saved address -->
+                </div>
+            </div>
+        </section>
+        
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+        <% if (locals.newAddress) { %>
+            <script>
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Address Added Successfully',
+                    icon: 'success'
+                })
+            </script>
+        <% } %>
+
+        <% if (locals.updateAddress) { %>
+            <script>
+                Swal.fire({
+                    title: 'Success',
+                    text: "Address Updated Successfully",
+                    icon: "success"
+                })
+            </script>
+        <% } %>
+        <script>
+            const addBtn = document.getElementById('addAddressBtn');
+            const savedAddressDiv = document.getElementById('savedAddress');
+            const title = document.getElementById('addressTitle');
+            const header = document.getElementById('addressHeader');
+            var editAddressDiv = document.createElement('section');
+            var addAddressDiv = document.createElement('section');
+
+            function appendAddForm(){
+                addAddressDiv.classList.add('row', 'justify-content-center', 'px-5')
+                addAddressDiv.innerHTML = `
+                <!-- add address -->
+
+                        <form class="card-body" action="/add-new-address" method="post" id="addressForm">
+                            <!--Grid row-->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <!--firstName-->
+                                    <div class="md-form ">
+                                        <label for="firstName" class="">First name</label>
+                                        <input type="text" id="firstName" name="firstName" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <!--lastName-->
+                                    <div class="md-form">
+                                        <label for="lastName" class="">Last name</label>
+                                        <input type="text" id="lastName" name="lastName" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Grid row-->
+
+                            <!--email-->
+                            <div class="md-form mb-3">
+                                <label for="email" class="">Email (optional)</label>
+                                <input type="text" id="email" name="email" class="form-control"
+                                    placeholder="youremail@example.com">
+                            </div>
+
+                            <!-- phone -->
+                            <label for="phone">Phone Number</label>
+                            <div class="md-form input-group pl-0 mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">+91</span>
+                                </div>
+                                <input type="text" class="form-control py-0" name="phone" id="phone"
+                                    placeholder="phone number" aria-describedby="basic-addon1">
+                            </div>
+
+                            <!--address-->
+                            <div class="md-form mb-3">
+                                <label for="address" class="">Address</label>
+                                <input type="text" id="address" name="address" class="form-control"
+                                    placeholder="1234 Main St">
+                            </div>
+
+                            <!--apartment-->
+                            <div class="md-form mb-4">
+                                <label for="apartment" class="">Apartment (optional)</label>
+                                <input type="text" id="apartment" name="apartment" class="form-control"
+                                    placeholder="Apartment or suite">
+                            </div>
+
+                            <!--Grid row-->
+                            <div class="row">
+                                <div class="col-lg-4 col-md-12 mb-4">
+                                    <label for="country">Country</label>
+                                    <input type="text" id="country" name="country" class="form-control" placeholder="">
+                                </div>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <label for="state">State</label>
+                                    <input type="text" name="state" id="state" class="form-control">
+                                </div>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <label for="postcode">Zip / postcode</label>
+                                    <input type="text" name="postcode" class="form-control" id="postcode"
+                                        placeholder="">
+                                </div>
+                            </div>
+                            <!--Grid row-->
+
+                            <div class="d-block my-3">
+                                <h4 class="mb-3">Address Type</h4>
+                                <div class="custom-control custom-radio">
+                                    <input id="home" name="addressType" value="home" type="radio"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="home">Home</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="work" name="addressType" value="work" type="radio"
+                                        class="custom-control-input">
+                                    <label class="custom-control-label" for="work">Work</label>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-inline justify-content-around">
+                                <button class="btn btn-primary flex-fill mr-5" onclick="back()" type="button">Cancel</button>
+                                <button class="btn btn-success flex-fill"  type="submit">Add New Address</button>
+                            </div>
+                        </form>
+                    <!-- !add address -->`;
+                    header.insertAdjacentElement('afterend', addAddressDiv);
+            };
+
+            function appendEditForm(addressId){
+                
+                title.innerHTML = 'Edit Address';
+                savedAddressDiv.classList.add('d-none');
+
+                $.ajax({
+                    url: `/get-address-detail/${addressId}`,
+                    dataType: 'json',
+                    success: (response) =>{
+
+                editAddressDiv.classList.add('row', 'justify-content-center', 'px-5');
+                editAddressDiv.innerHTML = `
+                <!-- Edit address -->
+
+                        <form class="card-body" action="/edit-address/${response[0].available._id}" method="post" id="addressForm">
+                            <!--Grid row-->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <!--firstName-->
+                                    <div class="md-form ">
+                                        <label for="firstName" class="">First name</label>
+                                        <input type="text" id="firstName" value="${response[0].available.firstName}" name="firstName" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <!--lastName-->
+                                    <div class="md-form">
+                                        <label for="lastName" class="">Last name</label>
+                                        <input type="text" id="lastName" value="${response[0].available.lastName}" name="lastName" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Grid row-->
+
+                            <!--email-->
+                            <div class="md-form mb-3">
+                                <label for="email" class="">Email (optional)</label>
+                                <input type="text" id="email" name="email" class="form-control"
+                                    placeholder="youremail@example.com" value="${response[0].available.email}">
+                            </div>
+
+                            <!-- phone -->
+                            <label for="phone">Phone Number</label>
+                            <div class="md-form input-group pl-0 mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon1">+91</span>
+                                </div>
+                                <input type="text" class="form-control py-0" name="phone" id="phone"
+                                    value="${response[0].available.phone}" aria-describedby="basic-addon1">
+                            </div>
+
+                            <!--address-->
+                            <div class="md-form mb-3">
+                                <label for="address" class="">Address</label>
+                                <input type="text" id="address" name="address" class="form-control"
+                                    placeholder="1234 Main St" value="${response[0].available.address}">
+                            </div>
+
+                            <!--apartment-->
+                            <div class="md-form mb-4">
+                                <label for="apartment" class="">Apartment (optional)</label>
+                                <input type="text" id="apartment" name="apartment" class="form-control"
+                                    placeholder="Apartment or suite" value="${response[0].available.apartment}">
+                            </div>
+
+                            <!--Grid row-->
+                            <div class="row">
+                                <div class="col-lg-4 col-md-12 mb-4">
+                                    <label for="country">Country</label>
+                                    <input type="text" id="country" name="country" class="form-control" value="${response[0].available.country}">
+                                </div>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <label for="state">State</label>
+                                    <input type="text" name="state" id="state" class="form-control" value="${response[0].available.state}">
+                                </div>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <label for="postcode">Zip / postcode</label>
+                                    <input type="text" name="postcode" class="form-control" id="postcode" value="${response[0].available.postcode}">
+                                </div>
+                            </div>
+                            <!--Grid row-->
+                            
+                            <div class="d-block my-3">
+                                <h4 class="mb-3">Address Type</h4>
+                                <div class="custom-control custom-radio">
+                                    <input id="home" name="addressType" value="home" type="radio"
+                                        class="custom-control-input" ${response[0].available.addressType === "home" ? "checked" : ""} >
+                                    <label class="custom-control-label" for="home">Home</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="work" name="addressType" value="work" type="radio"
+                                        class="custom-control-input" ${response[0].available.addressType === "work" ? "checked" : ""}>
+                                    <label class="custom-control-label" for="work">Work</label>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-inline justify-content-around">
+                                <button class="btn btn-primary flex-fill mr-5" onclick="back()" type="button">Cancel</button>
+                                <button class="btn btn-success flex-fill" type="submit">Update Address</button>
+                            </div>
+                        </form>
+                    <!-- !edit address -->`;
+                    header.insertAdjacentElement('afterend', editAddressDiv);
+                },
+                    error: (err) => {
+                        console.log(err);
+                    }
+                })
+            };
+            
+            function back(){
+                title.innerHTML = "Saved Address";
+                addAddressDiv.remove();
+                editAddressDiv.remove()
+                savedAddressDiv.classList.remove('d-none')
+            }
+
+            addBtn.addEventListener('click', () => {
+                title.innerHTML = 'Add Address'
+                savedAddressDiv.classList.add('d-none')
+                appendAddForm()
+            })
+
+            function deleteAddress(element){
+                var id = $(element).attr("data-id")
+
+                Swal.fire({
+                    title: "Confirmation",
+                    text: "Are you sure you want to delete this Address",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes",
+                    cancelButtonText: "No",
+                }).then((result) => {
+                    if(result.isConfirmed){
+                        $.ajax({
+                            url: '/delete-address',
+                            method: 'delete',
+                            data: {id},
+                            success: async(response) => {
+                                await  Swal.fire("Success", "Address deleted", "success");
+                                $(element).closest('.address-list-wrapper').remove()
+                            },
+                            error: (err) => {
+                                console.error(err);
+                            }
+                        })
+                    }
+                })
+            
+            }
+        </script>
+
+        <%- include('../includes/footer') %>
+        <%- include('../includes/foot') %>

@@ -1,0 +1,432 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+<style>
+  .error{
+    color: red;
+  }
+</style>
+
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-lg-12 text-center">
+            <div class="hero__text">
+                <h2>CHECKOUT</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <!--Main layout-->
+  <main class="mt-5 pt-4">
+    <div class="container wow fadeIn">
+
+      <!--Grid row-->
+      <div class="row">
+
+        <!--Grid column-->
+        <div class="col-md-7 mb-4" id="address-section">
+
+          <div class="row d-flex jstify-content-center mx-2" id="new-btn">
+            <button class="btn btn-primary flex-fill" onclick="withNewAddress()" type="button">Proceed with new Address</button>
+          </div>
+
+          <% if (locals.allAddress) { %>
+            <div class="row p-4 d-flex" id="address-box">
+              <form action="" data-cartId="<%= cartItems[0]._id %>" method="post" class="flex-fill" id="orderForm">
+                <% for( let i = 0; i < allAddress.available.length; i++ ) { %>
+                  <div class="border border-primary rounded p-4 mb-3">
+                    <div class="row form-check">
+                      <input class="form-check-input" type="radio" value="<%= allAddress.available[i]._id %>" name="addressId">
+                    </div>
+                    <div class="row">
+                      <p class="col-5 offset-1"><strong>Full Name: </strong>
+                        <%= allAddress.available[i].firstName + " " + allAddress.available[i].lastName %></p>
+                      <p class="col-6"><strong>Address: </strong><%= allAddress.available[i].address %></p>
+                      <p class="col-5 offset-1"><strong>Email: </strong><%= allAddress.available[i].email %></p>
+                      <p class="col-6"><strong>Apartment: </strong><%= allAddress.available[i].apartment %></p>
+                      <p class="col-5 offset-1"><strong>Mobile Number: </strong><%= allAddress.available[i].phone %></p>
+                      <p class="col-6"><strong>Address Type: </strong><%= allAddress.available[i].addressType %></p>
+                      <p class="col-3 offset-1"><strong>Country: </strong><%= allAddress.available[i].country %></p>
+                      <p class="col-3"><strong>State: </strong><%= allAddress.available[i].state %></p>
+                      <p class="col-3"><strong>Pin code: </strong><%= allAddress.available[i].postcode %></p>
+                    </div>
+                  </div>
+                <% } %>
+                  <div class="select ml-4"></div>
+                <div class="border border-primary rounded p-4 mb-3 payment-box">
+                  <h4>Choose Payment Option</h4>
+                  <hr>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod">
+                    <label class="form-check-label" for="cod">Cash On Delivery</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="pg" value="pg">
+                    <label class="form-check-label" for="pg">Payment Gateway</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="paymentMethod" id="wallet" value="wallet">
+                    <label class="form-check-label" for="wallet">Wallet</label>
+                  </div>
+  
+                  <div class="row d-flex jstify-content-center m-2">
+                    <button class="btn btn-info flex-fill" type="submit">Place Order</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          <% } else { %>
+            <div class="row d-flex justify-content-center my-5" id="address-box">
+              <p>You have No Saved Address. Proceed with new address</p>
+            </div>
+          <% } %>
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-md-5 mb-4">
+
+          <!-- Heading -->
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Your cart</span>
+            <span class="badge badge-secondary badge-pill"><%= cartItems.length %></span>
+          </h4>
+
+          <!-- Cart -->
+          <ul class="list-group mb-3 z-depth-1">
+
+            <% cartItems.forEach( data => { %>
+              <li class="list-group-item d-flex justify-content-between lh-condensed">
+                <div class="d-flex inline-flex align-items-center">
+                  <img style="width: 30px; height: auto; object-fit: contain; margin-right: 4px;" src="/images/product/<%= data.thubImg %>" alt="">
+                  <h6 class="my-0"><%= data.productName %> <span class="mx-2">&#8281;</span> <%= data.qty %></h6>
+                  <!-- <small class="text-muted">Brief description</small> -->
+                </div>
+                <span class="text-muted">&#8377; <%= data.subTotal %></span>
+              </li>
+            <% }) %>
+            
+            
+            <li class="list-group-item d-flex justify-content-between" id="total-block">
+              <span><strong>Total Price</strong></span>
+              <strong id="total-field">&#8377; <%= totalAmount.toLocaleString() %></strong>
+            </li>
+          </ul>
+          <!-- Cart -->
+
+          <!-- Promo code -->
+          <form class="card p-2" id="promo-form">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Promo code" id="promo-input">
+              <div class="input-group-append">
+                <button class="btn btn-secondary btn-md waves-effect m-0" type="submit">Redeem</button>
+              </div>
+            </div>
+          </form>
+          <!-- Promo code -->
+
+        </div>
+        <!--Grid column-->
+
+      </div>
+      <!--Grid row-->
+
+    </div>
+  </main>
+  <!--Main layout-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<!-- Validate form -->
+<script>
+
+$('#promo-form').submit((event) => {
+  event.preventDefault();
+
+  let total = '<%= totalAmount %>'
+  total = parseInt(total)
+  $.ajax({
+    url: '/checkout/check-coupon',
+    method: 'post',
+    data: {promoCode: $('#promo-input').val(), total: total},
+    success: (res) => {
+      if(res.couponApplied && res.doc.discount < total){
+        const li = appendCoupon(res.doc)
+        $('#total-block').before(li)
+        $('#promo-form button[type="submit"]').prop('disabled', true);
+        $('#total-field').html(`&#8377; ${total - res.doc.discount}`)
+      }else{
+        Swal.fire({
+          icon: 'warning',
+          title: res.msg ? res.msg : 'Promocode not applicable',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      }
+    },
+    error: (err) => {
+      console.log(err);
+    },
+    complete: () => {
+      $('#promo-input').val('');
+    }
+  })
+})
+
+function appendCoupon(doc){
+  var list = `<li class="list-group-item d-flex justify-content-between bg-light" id="coupon-list" data-id="${doc._id}">
+                <div class="text-success">
+                  <h6 class="my-0">Promo code</h6>
+                  <small>${doc.couponCode}</small>
+                </div>
+                <span class="text-success">- ₹ ${doc.discount}</span>
+              </li>`
+  return list
+}
+
+
+$('#orderForm').validate({
+  rules: {
+    addressId: {required: true},
+    paymentMethod: {required: true}
+  },
+  messages: {
+    addressId: {required: 'select an address'},
+    paymentMethod: {required: 'select payment method'}
+  },
+  errorPlacement: function(error, element){
+    if(element.attr('name') === 'addressId'){
+      error.appendTo(element.closest('#address-box').find('.select'))
+    } else if(element.attr('name') === "paymentMethod"){
+      error.insertAfter(element.closest('.payment-box').find('h4'))
+    } else {
+      // Default error message placement for other fields
+      error.insertAfter(element);
+    }
+  },
+  submitHandler: function(form) {
+    event.preventDefault()
+    const cartId = $(form).attr('data-cartId')
+    var formData = $(form).serializeArray();
+    const couponId = $('#coupon-list').data('id')
+
+    $.ajax({
+      url: `/placeorder-saved/${cartId}`,
+      method: 'post',
+      data: {formData, couponId},
+      success: function (response){
+        if(response.orderPlaced){
+          return location.href = `/order-placed/${response.orderId}`
+        }else if(response.err){
+          return Swal.fire({
+            title: 'Transaction Failed',
+            text: response.err,
+            icon: 'warning'
+          })
+        }
+        razorpayPayment(response.order, cartId)
+      },
+      error: function (err){
+        console.log(err);
+      }
+    }) 
+  }
+})
+
+function razorpayPayment(order, cartId){
+  var options = {
+    "key": "rzp_test_Efp3SE5mX1w37z", // Enter the Key ID generated from the Dashboard
+    "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "Digi Mart",
+    "description": "Test Transaction",
+    "image": "/images/digimart-logo.png",
+    "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+    "handler": function async (response){
+        verifyPayment(response, order, cartId)
+    },
+    "prefill": {
+        "name": "Gaurav Kumar",
+        "email": "gaurav.kumar@example.com",
+        "contact": "9000090000"
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+  };
+  var rzp1 = new Razorpay(options);
+  rzp1.on('payment.failed', function (response){
+          // alert(response.error.code);
+          // alert(response.error.description);
+          // alert(response.error.source);
+          // alert(response.error.step);
+          // alert(response.error.reason);
+          // alert(response.error.metadata.order_id);
+          // alert(response.error.metadata.payment_id);
+  });
+  rzp1.open();
+}
+
+function verifyPayment(payment, order, cartId){
+  $.ajax({
+    url: '/verify-payment',
+    data: {payment, order , cartId},
+    method: 'post',
+    success:async function (response){
+      if(response.orderPlaced){
+        return location.href = `/order-placed/${response.orderId}`
+      }else{
+        console.log(response.err);
+        Swal.fire({
+          title: 'Payment Failed',
+          text: 'check your money is debited',
+          icon: 'warning'
+        })
+      }
+    },
+    error: function(err){
+      console.log(err);
+    }
+  })
+}
+
+function withNewAddress(){
+  const addrFormWrapper = document.createElement('section')
+  const addressBox = document.getElementById('address-box')
+  const btn = document.getElementById('new-btn')
+    addressBox.classList.remove('d-flex')
+    addressBox.classList.add('d-none')
+    btn.classList.remove('d-flex'); btn.classList.add('d-none')
+
+    addrFormWrapper.classList.add('card')
+    addrFormWrapper.innerHTML = `
+    <form class="card-body" action="" data-cartId="<%= cartItems[0]._id %>" method="post" id="checkoutForm">
+            <!--Grid row-->
+              <div class="row">
+                <!--Grid column-->
+                <div class="col-md-6 mb-3">
+                  <!--firstName-->
+                  <div class="md-form ">
+                    <label for="firstName" class="">First name</label>
+                    <input type="text" id="firstName"  name="firstName" class="form-control">
+                  </div>
+                </div>
+                <!--Grid column-->
+                <!--Grid column-->
+                <div class="col-md-6 mb-3">
+                  <!--lastName-->
+                  <div class="md-form">
+                    <label for="lastName" class="">Last name</label>
+                    <input type="text" id="lastName" name="lastName" class="form-control">
+                  </div>
+                </div>
+                <!--Grid column-->
+              </div>
+              <!--Grid row-->
+              
+              <!--email-->
+              <div class="md-form mb-3">
+                <label for="email" class="">Email (optional)</label>
+                <input type="text" id="email" name="email" class="form-control" placeholder="youremail@example.com">
+              </div>
+
+              <!-- phone -->
+              <label for="phone">Phone Number</label>
+              <div class="md-form input-group pl-0 mb-5">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="basic-addon1">+91</span>
+                </div>
+                <input type="text" class="form-control py-0" name="phone" id="phone" placeholder="phone number" aria-describedby="basic-addon1">
+              </div>
+
+              <!--address-->
+              <div class="md-form mb-5">
+                <label for="address" class="">Address</label>
+                <input type="text" id="address" name="address" class="form-control" placeholder="1234 Main St">
+              </div>
+
+              <!--apartment-->
+              <div class="md-form mb-5">
+                <label for="apartment" class="">Apartment (optional)</label>
+                <input type="text" id="apartment" name="apartment" class="form-control" placeholder="Apartment or suite">
+              </div>
+
+              <!--Grid row-->
+              <div class="row">
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-12 mb-4">
+                  <label for="country">Country</label>
+                  <input type="text" id="country" name="country" class="form-control" placeholder="">
+                </div>
+                <!--Grid column-->
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-6 mb-4">
+                  <label for="state">State</label>
+                  <input type="text" name="state" id="state" class="form-control">
+                </div>
+                <!--Grid column-->
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-6 mb-4">
+                  <label for="postcode">Zip / postcode</label>
+                  <input type="text" name="postcode" class="form-control" id="postcode" placeholder="">
+                </div>
+                <!--Grid column-->
+              </div>
+              <!--Grid row-->
+
+              <hr>
+
+              <!-- <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="same-address">
+                <label class="custom-control-label" for="same-address">Shipping address is the same as my billing address</label>
+              </div> -->
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" name="saveInfo" id="save-info">
+                <label class="custom-control-label" for="save-info">Save this information for next time</label>
+              </div> 
+        
+              <div class="d-block my-3">
+                <h4 class="mb-3">Address Type</h4>
+                <div class="custom-control custom-radio">
+                  <input id="home" name="addressType" value="home" type="radio" class="custom-control-input">
+                  <label class="custom-control-label" for="home">Home</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input id="work" name="addressType" value="work" type="radio" class="custom-control-input" >
+                  <label class="custom-control-label" for="work">Work</label>
+                </div>
+              </div>
+
+              <hr>
+
+              <div class="d-block my-3">
+                <h4 class="mb-3">Payment Method</h4>
+                <div class="custom-control custom-radio">
+                  <input id="cash" name="paymentMethod" value="cod" type="radio" class="custom-control-input">
+                  <label class="custom-control-label" for="cash">Cash on delivery</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input id="online" name="paymentMethod" value="pg" type="radio" class="custom-control-input" >
+                  <label class="custom-control-label" for="online">Payment Gateway</label>
+                </div>
+              </div>
+              
+              <div class="d-flex inline-flex justify-content-around">
+                <button class="btn btn-info flex-fill" id="back-btn" type="button">Cancel</button>
+                <button class="btn btn-primary flex-fill ml-3" type="submit">Continue to checkout</button>
+              </div>
+            </form>
+    `
+    document.getElementById('address-section').insertAdjacentElement('afterend', addrFormWrapper)
+}
+</script>
+
+<%- include('../includes/footer') %>
+<%- include('../includes/foot') %>

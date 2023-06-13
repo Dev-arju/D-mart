@@ -1,0 +1,71 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+<section class="container shadow bg-light my-lg-4 mb-3 py-3 rounded" style="max-width: 380px; width: 100%">
+    <div class="text-center text-dark">
+        <h3 class="pb-3">SignUp</h3>
+    </div>
+    <% if (locals.exist) { %>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <%= exist %>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <% } %>
+
+    <% if (locals.logginErr) { %>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <%= logginErr %>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <% } %> 
+    
+    <form action="/signup" method="post" name="signupForm" id="signupForm">
+        <div class="form-group">
+            <label for="fullname" class="form-label m-0">Full Name</label>
+            <input type="text" id="fullname" name="fullname" class="form-control">
+            <span class="text-danger d-none" style="font-size: 12px; margin-left: 10px;" id="nameError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="email" class="form-label m-0">Email</label>
+            <input type="text" id="email" name="email" class="form-control">
+            <span class="text-danger d-none" style="font-size: 12px; margin-left: 10px;" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="mobile" class="form-label m-0">Mobile Number</label>
+            <div class="input-group">
+                <div class="input-group-prepend"><span class="input-group-text" id="mob-addon">+91</span></div>
+                <input type="text" id="mobile" name="number" class="form-control" aria-describedby="mob-addon">
+            </div>
+            <span class="text-danger d-none" style="font-size: 12px; margin-left: 10px;" id="mobError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="password" class="form-label m-0">Password</label>
+            <input type="password" id="password" name="password" class="form-control">
+            <span class="text-danger d-none" style="font-size: 12px; margin-left: 10px;" id="passError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="confirm-password" class="form-label m-0">Confirm Password</label>
+            <input type="text" id="confirm-password" name="confirmPassword" class="form-control">
+            <span class="text-danger d-none" style="font-size: 12px; margin-left: 10px;" id="passVerifyError"></span>
+        </div>
+
+        <div class="d-flex justify-content-center mb-3 py-3">
+            <button class="btn shadow btn-info rounded-pill text-center" type="submit"><strong>signup</strong></button>
+        </div>
+    </form>
+
+    <h6>Already have an account? <a href="/signin">Login here</a></h6>
+
+</section>
+
+<script src="/javascripts/signupValidation.js"></script>
+
+<%- include('../includes/foot') %>

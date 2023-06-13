@@ -1,0 +1,320 @@
+<%- include('../includes/admin/head') %>
+    <%- include('../includes/admin/partials') %>
+
+        <style>
+            .table td,
+            .table th {
+                white-space: normal;
+            }
+
+            .dataTables_info {
+                margin-left: 10px;
+                font-size: 14px;
+            }
+
+            .dataTables_filter {
+                margin-right: 25px;
+            }
+        </style>
+
+        <script>
+            function loadTableData() {
+                $.ajax({
+                    url: '/admin/order-data',  // Replace with your data source URL
+                    method: 'GET',
+                    success: function (response) {
+                        // Update the table with the received data
+                        var tableRows = appendTable(response.orders)
+                        $('#order-table tbody').html("");
+                        $('#order-table tbody').html(tableRows);
+                        initializeDataTables();
+                    },
+                    error: function (xhr) {
+                        // Handle error if any
+                        console.log(xhr);
+                    }
+                });
+            }
+
+            function appendTable(orders) {
+                var tableRows = '';
+                orders.forEach(function (order) {
+                    tableRows += '<tr>';
+                    tableRows += `<td class="align-middle text-center">
+                                <span class="text-secondary text-xs font-weight-bold">
+                                    ${new Date(order.createdAt).toLocaleDateString("en-US")}</span>
+                            </td>`;
+                    tableRows += `<td class="align-middle" style="white-space: nowrap;">
+                                <p class="text-sm font-weight-bold mb-1">${order.userId.fullname}</p>
+                            </td>`;
+                    tableRows += `<td class="text-center align-middle">
+                                <p class="text-xs  text-secondary mb-0">${order.paymentMethod}</p>
+                            </td>`;
+                    if (order.paymentStatus === 'success' || order.paymentStatus === 'refund') {
+                        tableRows += `<td class="align-middle text-center text-sm">
+                                <span class="badge badge-sm bg-gradient-success payment-status">${order.paymentStatus}</span>
+                            </td>`;
+                    } else {
+                        tableRows += `<td class="align-middle text-center text-sm">
+                                <span class="badge badge-sm bg-gradient-warning payment-status">${order.paymentStatus}</span>
+                            </td>`;
+                    }
+                    if (order.orderStatus === 'delivered') {
+                        tableRows += `<td class="align-middle text-center text-sm">
+                                    <span class="badge badge-sm bg-gradient-success status">${order.orderStatus}</span>
+                                </td>`;
+                    } else if (order.orderStatus === 'placed') {
+                        tableRows += `<td class="align-middle text-center text-sm">
+                                    <span class="badge badge-sm bg-gradient-info status">${order.orderStatus}</span>
+                                </td>`;
+                    } else {
+                        tableRows += `<td class="align-middle text-center text-sm">
+                                    <span class="badge badge-sm bg-gradient-warning status">${order.orderStatus}</span>
+                                </td>`;
+                    }
+                    tableRows += `<td class="text-center align-middle">
+                                <p class="text-sm font-weight-bold mb-1">&#8377; ${order.orderAmount}</p>
+                            </td>`;
+                    tableRows += `<td class="align-middle text-center">
+                              
+                                <button  class="btn btn-sm bg-gradient-info ms-1 m-0 px-2 py-1 text-xxs">
+                                    Details
+                                </button>
+                            </td>`;
+                    if(order.orderStatus === 'delivered' || order.orderStatus === 'cancelled'){
+                        tableRows += `<td class="align-middle">
+                                <div class="dropdown">
+                                  <button disabled class="btn btn-link text-secondary dropdown-toggle m-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      <i class="fa fa-ellipsis-v text-xs" aria-hidden="true"></i>
+                                  </button>
+                                  <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item text-success" onclick="changeStatus('${order._id}', 'shipped', this)">shipped</a></li>
+                                    <li><a class="dropdown-item text-warning" onclick="changeStatus('${order._id}', 'delivered', this)">delivered</a></li>
+                                    <li><a class="dropdown-item text-primary" onclick="changeStatus('${order._id}', 'cancelled', this)">cancel</a></li>
+                                  </ul>
+                                </div>
+                            </td> `;
+                    }else{
+                        tableRows += `<td class="align-middle">
+                                <div class="dropdown">
+                                  <button class="btn btn-link text-secondary dropdown-toggle m-0 status-btn" type="button"  data-bs-toggle="dropdown" aria-expanded="false">
+                                      <i class="fa fa-ellipsis-v text-xs" aria-hidden="true"></i>
+                                  </button>
+                                  <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item text-success" onclick="changeStatus('${order._id}', 'shipped', this)">shipped</a></li>
+                                    <li><a class="dropdown-item text-warning" onclick="changeStatus('${order._id}', 'delivered', this)">delivered</a></li>
+                                    <li><a class="dropdown-item text-primary" onclick="changeStatus('${order._id}', 'cancelled', this)">cancel</a></li>
+                                  </ul>
+                                </div>
+                            </td> `;
+                    }
+                    
+                    tableRows += '</tr>';
+                });
+                return tableRows
+            }
+
+            $(document).ready(function () {
+                loadTableData(); // Load the initial page
+            });
+        </script>
+
+
+        <div class="container">
+            <div class="row">
+                <form id="order-control">
+                    <div class="col-12 my-4 me-0">
+                        <div class="row ">
+                            <!-- <div class="col-md-1 col-1 d-flex align-items-center">
+                                <label for="sort" class="my-0 fw-lg">Sort By</label>
+                            </div>
+                            <div class="col-md-2 col-1 me-4 px-0 d-flex align-items-center">
+                                <select id="sort" class="form-control p-2" name="sortOption"
+                                    onfocus="hideFirstOption(this)">
+                                    <option selected value="">Options...</option>
+                                    <option value="dateAsce">oldest to newest</option>
+                                    <option value="dateDece">newest to oldest</option>
+                                    <option value="priceAsce">Price low to high</option>
+                                    <option value="priceDece">Price high to low</option>
+                                </select>
+                            </div> -->
+                            <div class="col-1 d-flex align-items-center justify-content-end">
+                                <label for="filter" class="my-0 fw-lg ">Filter :</label>
+                            </div>
+                            <div class="col d-flex align-items-center">
+                                <div class="input-group">
+                                    <select class="form-select" id="payment-method" name="paymentFilter"
+                                        onfocus="hideFirstOption(this)">
+                                        <option selected value="">Payment Method</option>
+                                        <option value="cod">COD</option>
+                                        <option value="pg">Online</option>
+                                        <option value="wallet">Wallet</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col d-flex align-items-center">
+                                <div class="input-group">
+                                    <select class="form-select" id="order-status" name="orderFilter"
+                                        onfocus="hideFirstOption(this)">
+                                        <option selected value="">Order Status</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="shipped">Shipped</option>
+                                        <option value="placed">Placed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-1 d-flex justify-content-center align-items-center">
+                                <input type="submit" class="btn btn-sm btn-success m-0 p-2" value="GO">
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+
+        <div class="container-fluid" id="main-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-body px-0 pt-0 pb-2">
+                            <div class="table-responsive py-4" style="overflow-y: hidden;min-height: 360px;">
+                                <table class="table table-hover align-items-center m-0" id="order-table"
+                                    style="border-spacing: 0;">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="text-center text-uppercase text-dark text-xs font-weight-bolder ">
+                                                Date</th>
+                                            <th class="text-uppercase text-dark text-xs font-weight-bolder ">
+                                                Customer</th>
+                                            <th
+                                                class="text-uppercase text-center text-dark text-xs font-weight-bolder ">
+                                                Payment Method</th>
+                                            <th
+                                                class="text-uppercase text-center text-dark text-xs font-weight-bolder ">
+                                                Payment Status</th>
+                                            <th
+                                                class="text-uppercase text-center text-dark text-xs font-weight-bolder ">
+                                                Order Status</th>
+                                            <th
+                                                class="text-uppercase text-center text-dark text-xs font-weight-bolder ">
+                                                Order Amount</th>
+                                            <th class="text-secondary opacity-7"></th>
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- table rows append here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+        
+        <script>
+            function changeStatus(orderId, status, element) {
+                event.preventDefault()
+
+                $.ajax({
+                    url: '/admin/change-status',
+                    data: { orderId, status },
+                    method: 'patch',
+                    success: (response) => { 
+                        if (response.statusChanged) {
+                            const statusBtn = $(element).closest('tr').find('.status-btn')
+                            if (response.paymentStatus) {
+                                $(element).closest('tr').find('.payment-status').removeClass()
+                                .addClass('badge badge-sm bg-gradient-success payment-status').html(response.paymentStatus)
+                                $(element).closest('tr').find('.status').removeClass().addClass('badge badge-sm bg-gradient-success status')
+                                statusBtn.prop('disabled', true)
+                            }else if(status === "delivered"){
+                                $(element).closest('tr').find('.status').removeClass().addClass('badge badge-sm bg-gradient-success status')
+                                statusBtn.prop('disabled', true)
+                            } else {
+                                $(element).closest('tr').find('.status').removeClass().addClass('badge badge-sm bg-gradient-warning status')
+                            }
+                            $(element).closest('tr').find('.status').html(status)
+                        }
+                    }
+                })
+            }
+        </script>
+
+        <!-- sort filter row -->
+        <script>
+            function hideFirstOption(element) {
+                var selectElement = $(element);
+                var firstOption = selectElement.find('option:first-child');
+                firstOption.addClass('d-none')// Hide the first option
+            }
+
+            $('#order-control').submit((event) => {
+                event.preventDefault();
+
+                const formValues = $(event.target).serializeArray();
+
+                let send = false
+                formValues.forEach(data => {
+                    if (data.value !== "") {
+                        send = true
+                    }
+                })
+                
+                if ($.fn.DataTable.isDataTable('#order-table')) {
+                    // Destroy the existing DataTable
+                    $('#order-table').DataTable().destroy();
+                    $('#order-table tbody').html("")
+                }
+                if (send) {
+                    $.ajax({
+                        url: '/admin/order-control',
+                        method: 'GET',
+                        data: formValues,
+                        success: function (response) {
+                            var tableRows = appendTable(response)
+                            $('#order-table tbody').html(tableRows);
+                            initializeDataTables()
+                        }
+                    })
+                } else {
+                    // load original order
+                    loadTableData();
+                }
+                resetForm();
+            })
+
+            function resetForm() {
+                $('#order-control').find('select').each((index, element) => {
+                    var firstOption = $(element).find('option:first-child');
+                    firstOption.removeClass('d-none')
+                    firstOption.prop('selected', true)
+                })
+            }
+
+            function initializeDataTables() {
+                $('#order-table').DataTable({
+                    lengthMenu: [5, 10, 15, 25],
+                    pageLength: 5,
+                    columnDefs: [
+                        { targets: [0, 1, 2, 3, 4, 5], orderable: true },
+                        { targets: '_all', orderable: false }
+                    ],
+                    searching: true
+                    // Add more options if needed
+                });
+            }
+        </script>
+
+
+
+        <%- include('../includes/admin/foot') %>

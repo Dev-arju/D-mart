@@ -1,0 +1,159 @@
+<%- include('../includes/admin/head') %>
+  <%- include('../includes/admin/partials') %>
+
+  <style>
+    
+    .dataTables_info {
+        margin-left: 10px;
+        font-size: 14px;
+    }
+
+    .dataTables_filter {
+        margin-right: 25px;
+    }
+  </style>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header d-flex flex-row justify-content-between pb-0">
+              <h6>Coupons</h6>
+              <a href="/admin/add-coupon" class="btn btn-success">Add Coupon</a>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table table-hover align-items-center mb-0" id="coupon-table">
+                  <thead>
+                    <tr>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Promo Code</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                        Discount</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status
+                      </th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                        Expires</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type
+                      </th>
+                      <th class="text-secondary opacity-7"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% coupons.forEach(coupon=> { %>
+                      <tr>
+                        <td class="align-middle text-center">
+                          <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">
+                              <%= coupon.couponCode %>
+                            </h6>
+                            <p class="text-xs text-secondary mb-0">min puchase amount: ₹ <%= coupon.minPurchase %>
+                            </p>
+                          </div>
+                        </td>
+                        <td class="align-middle text-center">
+                          <p class="text-xs font-weight-bold mb-0">₹ <%= coupon.discount %>
+                          </p>
+                        </td>
+                        <td class="align-middle text-center text-sm">
+                          <% if (coupon.couponStatus) { %>
+                            <span class="badge badge-sm bg-gradient-success status">Active</span>
+                            <% } else { %>
+                              <span class="badge badge-sm bg-gradient-warning status">In Active</span>
+                              <% } %>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">
+                            <%= coupon.expires.toLocaleDateString() %>
+                          </span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <p class="text-xs font-weight-bold mb-0">
+                            <%= coupon.couponType %>
+                          </p>
+                        </td>
+                        <td class="align-middle text-center">
+                          <% if (coupon.couponStatus) { %>
+                            <button class="btn btn-sm btn-danger m-0" type="button"
+                              onclick="changeCouponStat('<%= coupon._id %>', this)">Disable</button>
+                            <% } else { %>
+                              <button class="btn btn-sm btn-success m-0"
+                                onclick="changeCouponStat('<%= coupon._id %>', this)">Enable</button>
+                              <% } %>
+                        </td>
+                      </tr>
+                      <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.min.css">
+    <!-- SweetAlert JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.all.min.js"></script>
+
+
+    <script>
+
+      $(document).ready(function () {
+        $('#coupon-table').DataTable({
+          lengthMenu: [5, 10, 15, 25], // Set the available page lengths
+          pageLength: 5, // Set the initial page length
+          columnDefs: [
+            { targets: [0, 1, 2, 3, 4], orderable: true }, // Enable sorting for the first column (index 0)
+            { targets: '_all', orderable: false } // Disable sorting for all other columns
+          ],
+          searching: true // Enable searching
+          // Add more options if needed
+        });
+      });
+
+      const newCoupon = '<%= newCoupon %>'
+      if (newCoupon === 'true') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'new coupon added',
+          confirmButtonText: 'OK'
+        });
+      }
+
+      function changeCouponStat(couponId, element) {
+        let change;
+        let currStat = $(element).html();
+        if (currStat === 'Disable') {
+          change = false
+        } else {
+          change = true
+        }
+        $.ajax({
+          url: '/admin/update/coupon-status',
+          method: 'put',
+          data: { couponId, change },
+          success: (res) => {
+            if (res.currStatus === 'Active') {
+              $(element).removeClass('btn-success').addClass('btn-danger').html('Disable')
+              $(element).closest('tr').find('.status').removeClass('bg-gradient-warning')
+                .addClass('bg-gradient-success').html(res.currStatus)
+            } else {
+              $(element).removeClass('btn-danger').addClass('btn-success').html('Enable')
+              $(element).closest('tr').find('.status').removeClass('bg-gradient-success')
+                .addClass('bg-gradient-warning').html(res.currStatus)
+            }
+          },
+          error: (err) => {
+            console.error(err);
+          }
+        })
+      }
+
+    </script>
+
+    <%- include('../includes/admin/foot') %>

@@ -1,0 +1,165 @@
+<%- include('../includes/admin/head') %>
+    <%- include('../includes/admin/partials') %>
+
+
+        <style>
+            .dataTables_info {
+                margin-left: 10px;
+                font-size: 14px;
+            }
+
+            .dataTables_filter {
+                margin-right: 25px;
+            }
+        </style>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex flex-row justify-content-between pb-0">
+                            <h6>Categories</h6>
+                            <a href="/admin/category/add-category" class="btn btn-success">Add Category</a>
+                        </div>
+                        <div class="card-body px-0 pt-0 pb-2">
+                            <div class="table-responsive p-0">
+                                <table class="table table-hover align-items-center mb-0" id="category-table">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                No</th>
+                                            <th
+                                                class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Category</th>
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% limitedCategories.forEach((category, index)=> { %>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <p class="text-xs font-weight-bold mb-0">
+                                                        <%= index+1 %>
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex px-2 py-1">
+                                                        <div>
+                                                            <img src="/images/category/<%= category.imagename %>"
+                                                                class="avatar avatar-sm me-3"
+                                                                alt="<%= category.name %>">
+                                                        </div>
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm">
+                                                                <%= category.name %>
+                                                            </h6>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="d-flex justify-content-around align-items-center">
+                                                        <a href="/admin/category/edit/<%= category._id %>"
+                                                            class="text-primary font-weight-bold text-xs pe-2"
+                                                            data-toggle="tooltip" data-original-title="Edit category">
+                                                            Edit
+                                                        </a>
+                                                        <a data-id="<%= category._id %>" href="#"
+                                                            class="text-danger font-weight-bold text-xs pe-2 delete-btn">
+                                                            Delete
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#category-table').DataTable({
+                    lengthMenu: [5, 10, 15, 25], // Set the available page lengths
+                    pageLength: 5, // Set the initial page length
+                    columnDefs: [
+                        { targets: [0, 1], orderable: true }, // Enable sorting for the first column (index 0)
+                        { targets: '_all', orderable: false } // Disable sorting for all other columns
+                    ],
+                    searching: true // Enable searching
+                    // Add more options if needed
+                });
+            });
+        </script>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script>
+            $ondelete = $(".delete-btn");
+            $ondelete.click(function () {
+                var id = $(this).attr("data-id")
+
+                Swal.fire({
+                    title: 'Do you want to delete this category?',
+                    text: "Check if no products in this category.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/admin/category/delete',
+                            method: 'delete',
+                            data: { id },
+                            success: (res) => {
+                                if (res) {
+                                    Swal.fire({
+                                        title: "Message",
+                                        text: res.message,
+                                        icon: "info",
+                                        buttons: "ok",
+                                    }).then((value) => {
+                                        if (value) {
+                                            location.reload()
+                                        }
+                                    });
+                                }
+                            },
+                            error: (err) => {
+                                console.log(err);
+                            }
+                        })
+                    } else {
+                        // User clicked the "Cancel" button or closed the confirm box
+                        Swal.fire(
+                            'Cancelled',
+                            'Your item is safe.',
+                            'info'
+                        );
+                    }
+                });
+            })
+        </script>
+
+        <% if (locals.msg) { %>
+            <script>
+                Swal.fire({
+                    title: 'Message',
+                    text: '<%= msg %>',
+                    icon: 'success'
+                });
+            </script>
+            <% } %>
+
+
+                <%- include('../includes/admin/foot') %>

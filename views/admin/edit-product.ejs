@@ -1,0 +1,220 @@
+<%- include('../includes/admin/head') %>
+<%- include('../includes/admin/partials') %>
+
+
+<style>
+  .error{
+    color: red;
+    font-weight: 400;
+    margin: 0;
+  }
+  #image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #image-preview img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin: 10px;
+  }
+</style>
+
+<section class="container">
+    <div class="row pt-5 px-3" style="border-radius: 10%;">
+        <h1 class="text-dark">Edit Product</h1>
+
+        <!-- form  -->
+        <div class="col"  style="background: whitesmoke;">
+            <form action="/admin/products/edit-product/<%= product._id %>" id="productForm" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2 brand">
+                            <label for="Brand" class="form-label">Brand Name</label>
+                            <input type="text" class="form-control" id="Brand" name="brand" value="<%= product.company %>">
+                          </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2 product">
+                            <label for="ProductName" class="form-label">Product name</label>
+                            <input type="text" class="form-control" id="ProductName" name="productName" value="<%= product.productName %>">
+                          </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2 category">
+                          <label for="CategoryName" class="form-label">Category</label>
+                          <select class="form-select" style="color: grey;" id="CategoryName" name="category">
+                            <% categories.forEach(category => { %>
+                                <% if (category._id.equals(product.category)) { %>
+                                    <option value="<%= product.category %>" selected><%= category.name %></option>
+                                <% } %>
+                                <% if (!category._id.equals(product.category)) { %>
+                                    <option value="<%= category._id  %>"><%= category.name  %></option>
+                                <% } %> 
+                            <% }) %>
+                          </select>
+                          </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2 deal">
+                            <label for="Deal" class="form-label">Deal</label>
+                            <input type="text" class="form-control" id="Deal" name="deal" value="<%= product.deal %>">
+                          </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2 storage">
+                            <label for="Storage" class="form-label">Storage</label>
+                            <input type="text" class="form-control" id="Storage" name="storage" value="<%= product.storage %>">
+                          </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2 price">
+                            <label for="Price" class="form-label">Price</label>
+                            <input type="text" class="form-control" id="Price" name="price" value="<%= product.price %>">
+                          </div>
+                    </div>
+                </div>
+                <div class="row">
+                  <div class="col" id="image-preview">
+                    <% for( let k = 0; k < product.images.length; k++ ) { %>
+                      <img src="/images/product/<%= product.images[k] %>" alt="">
+                    <% } %>
+                  </div>
+                </div>
+                <div class="mb-2">
+                    <label for="ProductImages" class="form-label">Images</label>
+                    <input class="form-control" type="file" id="ProductImages" name="images" multiple>
+                  </div>
+                  <div class="row justify-content-around">
+                    <div class="col-md-4 mb-2">
+                        <a href="/admin/products" class="btn bg-gradient-info w-100 mt-4 mb-0">Cancel</a>
+                      </div>
+                      <div class="col-md-4 mb-2">
+                        <button type="submit" class="btn bg-gradient-success w-100 mt-4 mb-0">Update Product</button>
+                      </div>
+                  </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+
+<script>
+
+$('#ProductImages').change((event)=>{
+  const files = event.target.files;
+
+  $('#image-preview').html("");
+
+  for(let i=0; i<files.length; i++){
+    const file = files[i];
+    const reader = new FileReader();
+
+    reader.onload = function (event){
+      const img = document.createElement('img');
+      img.src = event.target.result;
+      $('#image-preview').append(img);
+    }
+    reader.readAsDataURL(file)
+  }
+})
+
+jQuery.validator.addMethod("noSpace", function (value, element) {
+    // allow any non-whitespace characters as the host part
+    return this.optional(element) || /^[^\s].*$/.test(value);
+  }, 'cannot contain only whitespaces or start with white spaces');
+
+$.validator.addMethod('negativeNum', function(value, element){
+  return Number(value) >= 0;
+}, 'enter a non-negative number')
+
+$.validator.addMethod('deal', function(value, element){
+
+  return value < 100 && value >= 0;
+}, 'deal must be a percentage value')
+
+$.validator.addMethod("maxImages", function(value, element) {
+  var files = element.files;
+  var count = 0;
+  for (var i = 0; i < files.length; i++) {
+    if (files[i].type.match(/image.*/)) {
+      count++;
+      if (count > 5) {
+        return false;
+      }
+    }
+  }
+  return true;
+}),
+
+
+  $("#productForm").validate({
+    rules: {
+      brand: {
+        required: true,
+        noSpace: true
+      },
+      productName: {
+        required: true,
+        noSpace: true
+      },
+      category: {
+        required: true
+      },
+      deal: {
+        required: true,
+        number: true,
+        negativeNum: true,
+        deal: true
+      },
+      storage: {
+        required: false
+      },
+      price: {
+        required: true,
+        number: true,
+        negativeNum: true
+      },
+      images: {
+        maxImages: true
+      }
+    },
+    messages: {
+      brand: {
+        required: "Enter brand or company name"
+      },
+      productName: {
+        required: "Enter product name"
+      },
+      category: {
+        required: "Select category",
+      },
+      deal: {
+        required: "Put best deal",
+        number: "Enter offer price"
+      },
+      price: {
+        required: "Enter product price",
+        number: "Enter product price"
+      },
+      images: {
+        maxImages: "maximum 5 images allowed"
+      }
+    },
+  
+    submitHandler: function(form) {
+    form.submit();
+  }
+ });
+</script>
+
+<%- include('../includes/admin/foot') %>

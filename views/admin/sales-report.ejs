@@ -1,0 +1,247 @@
+<%- include('../includes/admin/head') %>
+  <%- include('../includes/admin/partials') %>
+
+    <style>
+      .dataTables_info {
+        margin-left: 10px;
+        font-size: 14px;
+      }
+      .dataTables_filter {
+        margin-right: 25px;
+      }
+      .error{
+        color: red;
+        font-weight: 400;
+        margin: 0;
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header d-flex flex-row justify-content-center pb-0">
+              <h4>Sales Report</h4>
+            </div>
+            <form id="report-period">
+              <div class="row">
+                <div class="col-md-3 offset-md-1">
+                  <div class="form-group">
+                    <label for="start-date">From</label>
+                    <input type="date" class="form-control" id="start-date" name="start">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="start-date">To</label>
+                    <input type="date" class="form-control" id="end-date" name="end">
+                  </div>
+                </div>
+                <div class="col-md-5 d-flex justify-content-center align-items-center">
+                  <button class="btn btn-info mb-0 mt-3" type="submit">Generate Report</button>
+                </div>
+              </div>
+            </form>
+            <hr class="border border-dark">
+            <div class="card-body px-0 pt-0 pb-2" id="table-wrapper">
+
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SweetAlert CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.all.min.js"></script>
+    <!-- jquery validate CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <!-- XLSX CDN -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- PDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
+
+    <script>
+      $(document).ready(function () {
+        $('#report-period').validate({
+          rules: {
+            start: {
+              required: true
+            },
+            end: {
+              greaterThanOrEqualToStart: true,
+              required: true
+            }
+          },
+          messages: {
+            start: {
+              required: 'Enter start date'
+            },
+            end: {
+              greaterThanOrEqualToStart: 'End date must be greater than or equal to start date',
+              required: 'Enter end date'
+            }
+          },
+          submitHandler: (form) => {
+            const formData = $(form).serializeArray();
+            var tableWrapper = $('#table-wrapper')
+            
+            $.ajax({
+              url: '/admin/get-sales',
+              method: 'post',
+              data: formData,
+              success: (res) => {
+                if(res){
+                  
+                  var tableHead = appendTableHead(res.fromDate, res.toDate)
+                  var salesTable = appendSalesTable(res.sales, res.fromDate, res.toDate)
+
+                  tableWrapper.html('').addClass('d-none')
+                  tableWrapper.append(tableHead)
+                  tableWrapper.append(salesTable)
+                  addDataTable()
+                  tableWrapper.removeClass('d-none')
+                }
+              }
+            })
+
+           return false
+          }
+        });
+
+        // Custom rule method
+        $.validator.addMethod('greaterThanOrEqualToStart', function (value, element) {
+          var start = $('#start-date').val();
+          var end = value;
+          return this.optional(element) || end >= start;
+        }, '');
+
+
+      });
+
+      function appendTableHead(from, to){
+        var fromDate = new Date(from).toLocaleDateString();
+        var toDate = new Date(to).toLocaleDateString();
+        var tableHead = '';
+        tableHead += `
+              <div class="col d-flex justify-content-between align-items-center mx-4 mb-2 px-4 py-2">
+                <h5 class="m-0">Sales Report from ${fromDate} to ${toDate}</h5>
+                <div>
+                  <button class="btn btn-info py-2 m-0" onclick="downloadXlsx()"><i class="fa fa-file-excel"></i> xlsx</button>
+                  <button class="btn btn-info py-2 m-0" onclick="downloadPdf('${fromDate}', '${toDate}')"><i class="fa fa-file-pdf"></i> pdf</button>
+                </div>
+              </div>`;
+        return tableHead;
+      }
+
+      function appendSalesTable(orders, from, to){
+        var fromDate = new Date(from).toLocaleDateString();
+        var toDate = new Date(to).toLocaleDateString();
+        var salesTable = '';
+        salesTable += `
+              <div class="table-responsive p-0">
+                <table class="table table-hover align-items-center mb-0 w-100" id="product-table">
+                  <thead>
+                    <tr>
+                      <th colspan="6" class="text-center">SALES REPORT FROM ${fromDate} TO ${toDate}</th>
+                    </tr>
+                    <tr>
+                      <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        delivered date</th>
+                      <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        order id</th>
+                      <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        customer</th>
+                      <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        Amount</th>
+                      <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        applied coupon</th>
+                      <th class="text-center text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        payment method</th>
+                    </tr>
+                  </thead>
+                  <tbody>`
+        for(let i=0 ; i<orders.length ; i++){
+          let date = new Date(orders[i].deliveredAt).toLocaleDateString();
+          salesTable += `<tr>`
+          salesTable += `<td class="text-center">
+                            <p class="text-xs font-weight-bold mb-0">${date}</p>
+                          </td>`
+          salesTable += `<td>
+                            <p class="text-xs font-weight-bold mb-0 ps-3">${orders[i]._id}</p>
+                          </td>`
+          salesTable += `<td class="text-center">
+                            <p class="text-xs font-weight-bold mb-0">${orders[i].userId.fullname}</p>
+                          </td>`
+          salesTable += `<td class="text-center">
+                            <p class="text-xs font-weight-bold mb-0">${orders[i].orderAmount}</p>
+                          </td>`
+          if(orders[i].promocodeApplied){
+            salesTable += `<td class="text-center">
+                            <p class="text-xs font-weight-bold mb-0">${orders[i].promocodeApplied.couponCode}</p>
+                          </td>`
+          }else{
+            salesTable += `<td class="text-center">
+                            <p class="text-xs font-weight-bold mb-0">no coupon</p>
+                          </td>`
+          }
+          salesTable += `<td class="text-center">
+                            <p class="text-xs font-weight-bold mb-0">${orders[i].paymentMethod}</p>
+                          </td>`
+          salesTable += `</tr>`
+        }
+
+        salesTable += ` </tbody>
+                      </table>
+                    </div>`
+        return salesTable;
+      }
+
+      /* data table function */
+      function addDataTable(){
+        $('#product-table').DataTable({
+          lengthMenu: [5, 10, 15, 25], // Set the available page lengths
+          pageLength: 5, // Set the initial page length
+          columnDefs: [
+            { targets: [0, 1, 2, 3, 4, 5], orderable: true }, // Enable sorting for the first column (index 0)
+            { targets: '_all', orderable: false } // Disable sorting for all other columns
+          ],
+          searching: true // Enable searching
+          // Add more options if needed
+        });
+      }
+
+      /* xlsx sales report download */
+      function downloadXlsx(){
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.table_to_sheet(document.getElementById('product-table'));
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'SalesReport')
+
+        XLSX.writeFile(workbook, 'data.xlsx');
+      }
+
+      /* pdf sales report download */
+      function downloadPdf(from, to){
+        const table = document.getElementById('product-table')
+        html2pdf()
+          .set({
+            margin: 0.5,
+            filename: `sales_report_${from}_${to}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' },
+          })
+          .from(table)
+          .save()
+      }
+
+    </script>
+
+
+
+    <%- include('../includes/admin/foot') %>

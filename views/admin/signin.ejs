@@ -1,0 +1,51 @@
+<%- include('../includes/admin/head') %>
+
+<main class="main-content  mt-0">
+    <section>
+      <div class="page-header min-vh-75">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-5 col-lg-6 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent text-center">
+                  <h3 class="font-weight-bolder text-info text-gradient ">Welcome Admin</h3>
+                  <p class="mb-0">Enter your username and password to sign in</p>
+                </div>
+                <div class="card-body">
+                  <form role="form" action="/admin/signin" method="post">
+                    <label for="username">Username</label>
+                    <div class="mb-3">
+                      <input type="text" id="username" name="username" class="form-control" placeholder="username" aria-label="username">
+                      <!-- <span class="text-center text-danger small d-none" id="username-err"></span> -->
+                    </div>
+                    <label for="password">Password</label>
+                    <div class="mb-3">
+                      <input type="password" id="password" name="password" class="form-control" placeholder="Password" aria-label="Password">
+                      <!-- <span class="text-center text-danger small d-none" id="password-err"></span> -->
+                    </div>
+                    <div class="text-center">
+                      <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign in</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <% if (locals.adminErr) { %>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <span class="alert-text"><strong><%= adminErr %></strong></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+              <% } %>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+
+<%- include('../includes/admin/foot') %>

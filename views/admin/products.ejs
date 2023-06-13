@@ -1,0 +1,163 @@
+<%- include('../includes/admin/head') %>
+    <%- include('../includes/admin/partials') %>
+
+
+    <style>
+        .dataTables_info {
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        .dataTables_filter {
+            margin-right: 25px;
+        }
+    </style>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex flex-row justify-content-between pb-0">
+                            <h6>Products</h6>
+                            <a href="/admin/products/add-products" class="btn btn-success">Add Product</a>
+                        </div>
+                        <div class="card-body px-0 pt-0 pb-2">
+                            <div class="table-responsive p-0">
+                                <table class="table table-hover align-items-center mb-0" id="product-table">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                No</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Product Details</th>
+                                            <th
+                                                class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Category</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Price</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Offer</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                status</th>     
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <% availableProducts.forEach((product, index) => { %>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <p class="text-xs font-weight-bold mb-0"><%= index+1 %></p>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex px-2 py-1">
+                                                        <div>
+                                                            <img src="/images/product/<%= product.images[0] %>" class="avatar avatar-sm me-3"
+                                                                alt="<%= product.productName %>">
+                                                        </div>
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm"><%= product.productName %></h6>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <% for( let i = 0; i < categories.length; i++ ) { %>
+                                                        <% if (categories[i]._id.equals(product.category)) { %>
+                                                            <p class="text-xs font-weight-bold mb-0 ps-3"><%= categories[i].name %></p>
+                                                        <% } %>
+                                                    <% } %>       
+                                                  </td>
+                                                <td class="text-center">
+                                                    <p class="text-xs font-weight-bold mb-0"><%= product.price  %></p>
+                                                </td>
+                                                <td class="text-center">
+                                                    <p class="text-xs font-weight-bold mb-0"><%= product.deal  %> %</p>
+                                                </td>
+                                                <td class="align-middle text-center text-sm">
+                                                    <% if (product.deleted === false) { %>
+                                                        <span class="badge badge-sm bg-gradient-success">Available</span>
+                                                    <% } else { %>
+                                                        <span class="badge badge-sm bg-gradient-danger">Soft Deleted</span>
+                                                    <% } %> 
+                                                </td>
+    
+                                                <td class="align-middle">
+                                                    <div class="d-flex justify-content-around align-items-center">
+                                                        <a href="/admin/products/edit-product?id=<%= product._id %>" class="text-info font-weight-bold text-xs pe-2"
+                                                            data-toggle="tooltip" data-original-title="Edit product">
+                                                            Edit
+                                                        </a>
+                                                        <% if (product.deleted) { %>
+                                                            <a href="/admin/products/productstatus?id=<%= product._id %>&status=<%= product.deleted %>" class="text-successs font-weight-bold text-xs pe-2"
+                                                                data-toggle="tooltip" data-original-title="Delete Product">
+                                                                Restore
+                                                            </a>
+                                                        <% } else { %>
+                                                            <a href="/admin/products/productstatus?id=<%= product._id %>&status=<%= product.deleted %>" class="text-danger font-weight-bold text-xs pe-2"
+                                                                data-toggle="tooltip" data-original-title="Delete Product" >
+                                                                Soft Delete
+                                                            </a>
+                                                        <% } %>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+
+        
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+        <script>
+            $(document).ready(function () {
+                $('#product-table').DataTable({
+                    lengthMenu: [5, 10, 15, 25], // Set the available page lengths
+                    pageLength: 5, // Set the initial page length
+                    columnDefs: [
+                        { targets: [0, 1, 2, 3, 4, 5], orderable: true }, // Enable sorting for the first column (index 0)
+                        { targets: '_all', orderable: false } // Disable sorting for all other columns
+                    ],
+                    searching: true // Enable searching
+                    // Add more options if needed
+                });
+            });
+        </script>
+        
+        <% if (locals.msg) { %>
+            <% if (msg.success) { %>
+                <script>
+                    Swal.fire({
+                        title: 'Message',
+                        text: '<%= msg.success %>',
+                        icon: 'success'
+                    });
+                </script>
+            <% } else if(msg.error) { %>
+                <script>
+                    Swal.fire({
+                        title: 'Message',
+                        text: '<%= msg.error %>',
+                        icon: 'error'
+                    });
+                </script>
+            <% } %>
+        <% } %>
+
+        <%- include('../includes/admin/foot') %>

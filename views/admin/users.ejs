@@ -1,0 +1,122 @@
+<%- include('../includes/admin/head') %>
+    <%- include('../includes/admin/partials') %>
+
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+        <style>
+            .dataTables_info {
+                margin-left: 10px;
+                font-size: 14px;
+            }
+        </style>
+
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-header pb-0 d-flex justify-content-center">
+                            <h6>Customers</h6>
+                        </div>
+                        <div class="card-body px-0 pt-0 pb-2">
+                            <div class="table-responsive p-0">
+                                <table class="table table-hover align-items-center mb-0" id="user-table">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                No</th>
+                                            <th
+                                                class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                User</th>
+                                            <th
+                                                class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                                Mobile Number</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Status</th>
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% tempUser.forEach((user,index)=> { %>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <p class="text-xs font-weight-bold mb-0">
+                                                        <%= index+1 %>
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex px-2 py-1">
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm">
+                                                                <%= user.fullname %>
+                                                            </h6>
+                                                            <p class="text-xs text-secondary mb-0">
+                                                                <%= user.email %>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <p class="text-xs font-weight-bold mb-0">
+                                                        <%= user.mobileNumber %>
+                                                    </p>
+                                                </td>
+                                                <td class="align-middle text-center text-sm">
+                                                    <% if (user.isActive) { %>
+                                                        <span class="badge badge-sm bg-gradient-success">Active</span>
+                                                        <% } else { %>
+                                                            <span
+                                                                class="badge badge-sm bg-gradient-secondary">InActive</span>
+                                                            <% } %>
+                                                </td>
+
+                                                <td class="align-middle">
+                                                    <div class="d-flex justify-content-center">
+                                                        <% if (user.isActive) { %>
+                                                            <a href="/admin/users/<%= user._id %>?changeStatus=false"
+                                                                class="text-danger font-weight-bold text-xs"
+                                                                data-toggle="tooltip" data-original-title="Edit user">
+                                                                Block
+                                                            </a>
+                                                            <% } else { %>
+                                                                <a href="/admin/users/<%= user._id %>?changeStatus=true"
+                                                                    class="text-success font-weight-bold text-xs"
+                                                                    data-toggle="tooltip"
+                                                                    data-original-title="Edit user">
+                                                                    UnBlock
+                                                                </a>
+                                                                <% } %>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(document).ready(function () {
+                $('#user-table').DataTable({
+                    lengthMenu: [5, 10, 15, 25], // Set the available page lengths
+                    pageLength: 5, // Set the initial page length
+                    columnDefs: [
+                        { targets: [0, 1, 3], orderable: true }, 
+                        { targets: '_all', orderable: false }
+                    ],
+                    searching: true // Enable searching
+                    // Add more options if needed
+                });
+            });
+
+        </script>
+
+
+        <%- include('../includes/admin/foot') %>

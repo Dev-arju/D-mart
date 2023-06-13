@@ -1,0 +1,257 @@
+<%- include('../includes/admin/head') %>
+    <%- include('../includes/admin/partials') %>
+
+        <style>
+            .dataTables_info {
+                margin-left: 10px;
+                font-size: 14px;
+            }
+
+            .dataTables_filter {
+                margin-right: 25px;
+            }
+        </style>
+
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex flex-row justify-content-between pb-0">
+                            <h6>Banners</h6>
+                            <span class="text-danger text-xxs text-italic">Nb: at a time only 2 banners can be
+                                used!</span>
+                            <a href="/admin/add-banner" class="btn btn-success">Add Banner</a>
+                        </div>
+                        <div class="card-body px-0 pt-0 pb-2">
+                            <div class="table-responsive p-0">
+                                <table class="table table-hover align-items-center mb-0" id="banner-table">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                No</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                Banner Name</th>
+                                            <th
+                                                class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                status</th>
+                                            <th class="text-secondary opacity-7"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <% allBanners.forEach((banner, index)=> { %>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <p class="text-xs font-weight-bold mb-0">
+                                                        <%= index + 1 %>
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex px-2 py-1">
+                                                        <div>
+                                                            <img src="/images/banner/<%= banner.imgName %>"
+                                                                class="avatar avatar-sm me-3"
+                                                                alt="/images/banner/<%= banner.imgName %>">
+                                                        </div>
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm">
+                                                                <%= banner.name %>
+                                                            </h6>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle text-center text-sm">
+                                                    <% if (banner.currentBanner) { %>
+                                                        <span
+                                                            class="badge badge-sm bg-gradient-success status">Active</span>
+                                                        <% } else { %>
+                                                            <span class="badge badge-sm bg-gradient-warning status">In
+                                                                Active</span>
+                                                            <% } %>
+                                                </td>
+                                                <td class="align-middle">
+                                                    <div class="d-flex justify-content-around align-items-center">
+
+                                                        <a href="/admin/edit-banner/<%= banner._id %>"
+                                                            class="text-info font-weight-bold text-sm pe-2">
+                                                            Edit
+                                                        </a>
+                                                        <% if (banner.currentBanner) { %>
+                                                            <a href="#" data-id="<%= banner._id %>"
+                                                                data-status="<%= banner.currentBanner %>"
+                                                                class="text-primary font-weight-bold text-sm pe-2 status-button"
+                                                                style="cursor: pointer;">
+                                                                Hide
+                                                            </a>
+                                                            <% } else { %>
+                                                                <a href="#" data-id="<%= banner._id %>"
+                                                                    data-status="<%= banner.currentBanner %>"
+                                                                    class="text-primary font-weight-bold text-sm pe-2 status-button"
+                                                                    style="cursor: pointer;">
+                                                                    Show
+                                                                </a>
+                                                                <% } %>
+                                                                    <a onclick="delBanner('<%= banner._id %>', '<%= index %>', this)"
+                                                                        class="text-danger font-weight-bold text-sm pe-2"
+                                                                        style="cursor: pointer;">
+                                                                        Delete
+                                                                    </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SweetAlert CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.min.css">
+        <!-- SweetAlert JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.all.min.js"></script>
+
+        <script>
+
+
+
+            $(document).ready(function () {
+                $('#banner-table').DataTable({
+                    lengthMenu: [5, 10, 15, 25], // Set the available page lengths
+                    pageLength: 5, // Set the initial page length
+                    columnDefs: [
+                        { targets: [0, 1, 2], orderable: true }, // Enable sorting for the first column (index 0)
+                        { targets: '_all', orderable: false } // Disable sorting for all other columns
+                    ],
+                    searching: true // Enable searching
+                });
+                const newBanner = JSON.parse('<%= bannerAdded %>' || null);
+                const updated = JSON.parse('<%= bannerUpdated %>' || null)
+                if (newBanner) {
+                    Swal.fire({
+                        title: "Success",
+                        text: 'New Banner Added',
+                        icon: 'success'
+                    })
+                }
+                if (updated) {
+                    Swal.fire({
+                        title: 'Updated',
+                        text: 'banner updated successfully!',
+                        icon: 'success'
+                    })
+                }
+            });
+
+            /* for change banner default status  */
+            $(document).on('click', '.status-button', (event) => {
+                event.preventDefault();
+                const btnElement = $(event.target);
+                const statusElement = $(event.target).closest('tr').find('.status')
+                const currStat = $(event.target).data('status');
+                const bannerId = $(event.target).data('id');
+
+                $.ajax({
+                    url: '/admin/banner/change-status',
+                    method: 'patch',
+                    data: { bannerId, currStat },
+                    success: function (response) {
+                        if (response.statusChanged) {
+                            if (response.newStatus) {
+                                statusElement
+                                    .removeClass()
+                                    .addClass('badge badge-sm bg-gradient-success status')
+                                    .html('Active');
+                                $(btnElement)
+                                    .data('status', response.newStatus)
+                                    .html('Hide')
+                            } else {
+                                statusElement
+                                    .removeClass()
+                                    .addClass('badge badge-sm bg-gradient-warning status')
+                                    .html('In Active');
+                                $(btnElement)
+                                    .data('status', response.newStatus)
+                                    .html('Show')
+                            }
+                        } else {
+                            Swal.fire({
+                                title: 'Banner Status not Changed',
+                                text: response.msg,
+                                icon: 'info'
+                            })
+                        }
+                    },
+                    error: (err) => {
+                        console.error(err);
+                    }
+                })
+
+            })
+
+            function delBanner(id, index, element) {
+                index = parseInt(index)
+
+                Swal.fire({
+                    title: 'Confirm',
+                    text: 'Do you want to delete this banner?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/admin/delete-banner',
+                            method: 'DELETE',
+                            data: { id },
+                            success: function (response) {
+                                if (response.bannerDeleted) {
+                                    if (index === 0) {
+                                        Swal.fire({
+                                            title: 'Deleted',
+                                            text: 'Banner Deleted Successfully',
+                                            icon: 'success',
+                                            showCancelButton: false,
+                                            confirmButtonText: 'OK'
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                location.reload()
+                                            }
+                                        })
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Deleted',
+                                            text: 'Banner Deleted Successfully',
+                                            icon: 'success'
+                                        })
+                                        $(element).closest('tr').remove()
+                                    }
+                                } else {
+                                    Swal.fire({
+                                        title: 'Warning',
+                                        text: 'Cannot delete active banner!',
+                                        icon: 'info'
+                                    })
+                                }
+                            }
+                        })
+                    }
+                });
+            }
+        </script>
+
+
+
+        <%- include('../includes/admin/foot') %>

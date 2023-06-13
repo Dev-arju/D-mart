@@ -1,0 +1,69 @@
+
+/* profile, address , wallet */
+
+.side-menu{
+    max-height: 480px;
+    background: #f2f2f2;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.profile-tab{
+    color: darkgrey;
+    letter-spacing: 2px;
+    margin: 10px 0px 20px 10px;
+    font-size: 22px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 2px solid #000;
+}
+.profile-tab:hover{
+    color: #000;
+    background: #ffff;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin: 10px 0px 20px 10px;
+    border-radius: 20px;
+}
+.profile-tab a{
+    text-decoration: none;
+    color: darkgrey;
+    letter-spacing: 2px;
+}
+.profile-tab a:hover{
+    color: #000;
+    background: #ffff;
+}
+#main-section{
+    min-height: 480px;
+    background: #f2f2f2;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.field h6{
+    color: rgba(99, 99, 99, 0.598);
+    border-right: 2px solid grey;
+    
+}
+.value h6{
+    color: black;
+    font-weight: 600;
+    
+}
+.field p{
+    margin: 0;
+    color: rgba(99, 99, 99, 0.598);
+    border: 1px solid grey;
+}
+.value p{
+    color: black;
+    font-weight: 600;
+    border-left: 1px solid grey;
+    border-right: 1px solid grey;
+    border-bottom: 1px solid grey;
+}
+
+.error{
+    color: red;
+}

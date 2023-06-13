@@ -1,0 +1,64 @@
+<%- include('../includes/head') %>
+<%- include('../includes/header') %>
+
+<style>
+    .active{
+    background: #ffff;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin: 10px 0px 20px 10px;
+    border-radius: 20px;
+    }
+    .active a{
+        color: #000;
+    }
+</style>
+
+<section class="container mb-5">
+    <div class="row">
+        <div class="col-lg-3 my-3 p-5 side-menu">
+            <div class="d-flex flex-column mt-5">
+                <h4 class="profile-tab "><a href="/profile">Profile</a></h4>
+                <h4 class="profile-tab"><a href="/address">Address</a></h4>
+                <h4 class="profile-tab active"><a href="/wallet">Wallet</a></h4>
+            </div>
+        </div>
+        <div class="col-lg-8 my-3 offset-lg-1" id="main-section">
+            <div class="row d-flex flex-column flex-wrap align-items-center" id="addressHeader">
+                <div class="col-md-4 text-center pt-5 mb-4">
+                    <h2 class="text-uppercase text-Dark" id="addressTitle" style="font-size: 26px;font-weight: 800;">
+                        Wallet Coins</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8 offset-2 mt-4 py-3 d-flex flex-column align-items-center">
+                    <img src="/images/rupee.png" style="width: 150px;height: auto;" alt="">
+                    <h1><strong>&#8377; <%= wallet.coins %></strong></h1>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    <table class="table">
+                        <thead>
+                            <th scope="col">Date</th>
+                            <th scope="col">Transaction type</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">remarks</th>
+                        </thead>
+                        <tbody>
+                            <% for( let i = 0; i < wallet.transactions.length; i++ ) { %>
+                              <tr>
+                                <td><%= wallet.transactions[i].date.toLocaleDateString() %></td>
+                                <td><%= wallet.transactions[i].type %></td>
+                                <td><%= wallet.transactions[i].value %></td>
+                                <td><%= wallet.transactions[i].reason %></td>
+                              </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>

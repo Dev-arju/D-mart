@@ -1,0 +1,109 @@
+<%- include('../includes/admin/head') %>
+    <%- include('../includes/admin/partials') %>
+
+        <style>
+            .error {
+                color: red;
+                font-weight: 400;
+                margin: 0;
+            }
+            #image-preview img{
+                max-width: 600px;
+                object-fit: cover;
+                aspect-ratio: 16/9 ;
+            }
+        </style>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-12">
+                    <form action="/admin/edit-banner" id="edit-banner" method="post" enctype="multipart/form-data">
+                        <h4 class="text-center py-4">Edit Banner</h4>
+                        <input type="text" name="bannerId" value="<%= banner._id %>" style="display: none;">
+                        <div class="form-group">
+                            <label for="categoryName">Banner Name</label>
+                            <input type="text" class="form-control" id="banner-name" name="name"
+                                value="<%= banner.name %>">
+                        </div>
+
+                        <div class="d-flex justify-content-center" id="image-preview">
+                            <img src="/images/banner/<%= banner.imgName %>" alt="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="banner-img">Banner Image</label>
+                            <input type="file" accept="image/jpeg, image/png, image/jpg" name="bannerImg"
+                                class="form-control" id="banner-img">
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button type="button" onclick="goBack()" class="btn btn-primary mx-3">Cancel</button>
+                            <button type="submit" class="btn btn-success mx-3 ">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- SweetAlert cdn -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.all.min.js"></script>
+        <!-- jquery validate cdn -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+
+        <script>
+            $(document).ready(()=>{
+                const exist = JSON.parse('<%= bannerExist %>' || null)
+                if(exist){
+                    Swal.fire({
+                        title: 'Failed',
+                        text: 'banner name already exists. try new one!',
+                        icon: 'info'
+                    })
+                }
+            })
+
+            function goBack(){
+                location.replace('/admin/banner')
+            }
+
+            jQuery.validator.addMethod("noSpace", function (value, element) {
+                // allow any non-whitespace characters as the host part
+                return this.optional(element) || /^[^\s].*$/.test(value);
+            }, 'cannot contain only whitespaces or start with white spaces');
+
+            $('#edit-banner').validate({
+                rules: {
+                    name: {
+                        required: true,
+                        noSpace: true
+                    }
+                },
+                messages: {
+                    name: {
+                        required: "Category name field must be filed"
+                    }
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            })
+
+            $('#banner-img').change((event) => {
+                const file = event.target.files;
+                const reader = new FileReader();
+
+                $('#image-preview').html("");
+
+                reader.onload = function (event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    $('#image-preview').append(img);
+                }
+                reader.readAsDataURL(file[0])
+
+            })
+
+        </script>
+
+<%- include('../includes/admin/foot') %>

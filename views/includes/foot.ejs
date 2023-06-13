@@ -1,0 +1,149 @@
+<!--
+        Script
+        =================================================-->
+<script src="/javascripts/js/jquery-3.3.1.min.js"></script>
+<script src="/javascripts/js/bootstrap.min.js"></script>
+<script src="/javascripts/js/jquery.nice-select.min.js"></script>
+<script src="/javascripts/js/jquery-ui.min.js"></script>
+<script src="/javascripts/js/jquery.slicknav.js"></script>
+<script src="/javascripts/js/mixitup.min.js"></script>
+<script src="/javascripts/js/owl.carousel.min.js"></script>
+<script src="/javascripts/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+
+<script>
+  jQuery.validator.addMethod("noSpace", function (value, element) {
+    // allow any non-whitespace characters as the host part
+    return this.optional(element) || /^[^\s].*$/.test(value);
+  }, 'Invalid Name');
+
+  // Handle form submission
+  $(document).on("submit", "#addressForm", function (event) {
+    event.preventDefault();
+
+    $(this).validate({
+      rules: {
+        firstName: {
+          required: true,
+          noSpace: true
+        },
+        lastName: {
+          required: true,
+          noSpace: true
+        },
+        email: { email: true },
+        phone: { required: true, number: true, minlength: 10, maxlength: 10 },
+        address: { required: true },
+        country: { required: true },
+        state: { required: true },
+        postcode: { required: true, number: true, minlength: 6, maxlength: 6 },
+        addressType: { required: true }
+      },
+      messages: {
+        firstName: { required: 'Enter your first name'},
+        lastName: { required: 'Enter your last name'},
+        email: { email: 'Enter a valid e-mail address' },
+        phone: { required: 'Enter your contact number', number: 'Only digits allowed', minlength: 'Enter valid 10 digit number', maxlength: 'Enter valid 10 digit number' },
+        address: { required: 'Enter your address' },
+        country: { required: 'Enter your County' },
+        state: { required: 'Enter your State' },
+        postcode: { required: 'Enter your pincode', number: 'only digits allowed', minlength: 'Enter a valid 6 digit pincode', maxlength: 'Enter a valid 6 digit pincode' },
+        addressType: { required: 'Choose address type' }
+      },
+      errorPlacement: function (error, element) {
+        if (element.attr('name') === 'addressType') {
+          // Adjust the error message position for addressType field
+          error.appendTo(element.closest('.d-block'));
+        } else if (element.attr('name') === 'phone') {
+          error.insertBefore(element.closest('.input-group'));
+        } else {
+          // Default error message placement for other fields
+          error.insertAfter(element);
+        }
+      },
+      submitHandler: function (form) {
+        // This function will be called when the form is valid and ready to be submitted
+        form.submit();
+      }
+    });
+    if ($(this).valid()) {
+      $(this).submit()
+    }
+  });
+
+  // handle back button on checkout page
+  $(document).on('click', '#back-btn', () => {
+    location.reload()
+  })
+
+  // Handle form submission of checkout form
+  $(document).on('submit', '#checkoutForm', function (event) {
+    event.preventDefault()
+
+    $(this).validate({
+      rules: {
+        firstName: { required: true , noSpace: true},
+        lastName: { required: true, noSpace: true},
+        email: { email: true },
+        phone: { required: true, number: true, minlength: 10, maxlength: 10 },
+        address: { required: true },
+        country: { required: true },
+        state: { required: true },
+        postcode: { required: true, number: true, minlength: 6, maxlength: 6 },
+        addressType: { required: true },
+        paymentMethod: { required: true },
+      },
+      messages: {
+        firstName: { required: 'Enter your first name' },
+        lastName: { required: 'Enter your last name' },
+        email: { email: 'Enter a valid e-mail address' },
+        phone: { required: 'Enter your contact number', number: 'Only digits allowed', minlength: 'Enter valid 10 digit number', maxlength: 'Enter valid 10 digit number' },
+        address: { required: 'Enter your address' },
+        country: { required: 'Enter your County' },
+        state: { required: 'Enter your State' },
+        postcode: { required: 'Enter your pincode', number: 'only digits allowed', minlength: 'Enter a valid 6 digit pincode', maxlength: 'Enter a valid 6 digit pincode' },
+        addressType: { required: 'Choose address type' },
+        paymentMethod: { required: 'Choose payment option' },
+      },
+      errorPlacement: function (error, element) {
+        if (element.attr('name') === 'addressType' || element.attr('name') === 'paymentMethod') {
+          // Adjust the error message position for addressType and paymentMethod fields
+          error.appendTo(element.closest('.d-block'));
+        } else {
+          // Default error message placement for other fields
+          error.insertAfter(element);
+        }
+      },
+      submitHandler: function (form) {
+        event.preventDefault()
+        const couponId = $('#coupon-list').data('id')
+        const cartId = $(form).attr('data-cartId')
+        var formData = $(form).serializeArray();
+
+        $.ajax({
+          url: `/placeorder/${cartId}?promo=${couponId}`,
+          method: 'post',
+          data: formData,
+          success: function (response) {
+            if (response.orderPlaced) {
+              return location.href = `/order-placed/${response.orderId}`
+            }
+            razorpayPayment(response.order, cartId)
+          },
+          error: function (err) {
+            console.log(err);
+          }
+        })
+      }
+    })
+    if ($(this).valid()) {
+      $(this).submit()
+    }
+  })
+
+
+</script>
+
+</body>
+
+</html>

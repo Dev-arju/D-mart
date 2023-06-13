@@ -1,0 +1,116 @@
+<%- include('../includes/head') %>
+    <%- include('../includes/header') %>
+
+        <!-- Product Section Begin -->
+        <section class="product spad">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3 col-md-5">
+                        <div class="sidebar">
+
+                            <div class="sidebar__item">
+                                <h4 class="text-center">Department</h4>
+                                <ul>
+                                    <% categories.forEach(category=> { %>
+                                        <li class="text-dark text-center mb-3 pointer" style="cursor: pointer;"
+                                            onclick="clicked(this)" data-cat="<%= category.name %>"><b>
+                                                <%= category.name %>
+                                            </b></li>
+                                        <% }) %>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-9 col-md-7">
+                        <div class="row">
+
+                            <% products.forEach(product=> { %>
+                                <div class="col-lg-4 col-md-6 col-sm-6  ">
+                                    <div class="product__item set <%= product.categoryName %>">
+                                        <div class="product__item__pic set-bg"
+                                            data-setbg="/images/product/<%= product.images[0] %>">
+                                            <div class="border rounded-circle bg-danger text-center p-2" 
+                                                style="width: 50px;height: 50px; line-height: 1;">
+                                                <span class="text-white text-center">
+                                                    <%= product.deal %>&#37; off
+                                                </span>
+                                            </div>
+                                            <ul class="product__item__pic__hover">
+                                                <li><a onclick="addWishlist('<%= product._id %>')"><i
+                                                            class="fa fa-heart"></i></a></li>
+                                                <li><a onclick="addCart('<%= product._id %>')"><i
+                                                            class="fa fa-shopping-cart"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="product__item__text">
+                                            <h6><a href="/product/<%= product._id %>">
+                                                    <%= product.productName %>
+                                                </a></h6>
+                                            <h5>&#8377; <%= Math.floor(product.price - (product.price * (product.deal /
+                                                    100))) %>
+                                            </h5>
+                                            <p style="text-decoration: line-through;">&#8377; <%= product.price %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+
+                        </div>
+                    </div>
+                </div>
+        </section>
+        <!-- Product Section End -->
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"
+            integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script>
+            function addCart(productId) {
+
+                $.ajax({
+                    url: "/add-to-cart",
+                    method: "POST",
+                    data: { productId },
+                    success: function (response) {
+                        if ($('#cartCount').hasClass('d-none')) {
+                            $('#cartCount').removeClass('d-none')
+                        }
+                        $('#cartCount').html(response.cartCount)
+                        console.log(response.cartCount);
+                        Swal.fire({
+                            title: response.title,
+                            text: response.text,
+                            icon: response.icon
+                        })
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                })
+            }
+            function addWishlist(productId) {
+                $.ajax({
+                    url: '/add-to-wishlist',
+                    method: 'post',
+                    data: { productId },
+                    success: (response) => {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.text,
+                            icon: response.icon
+                        })
+                    },
+                    error: (err) => {
+                        console.log(err);
+                    }
+                })
+            }
+        </script>
+
+
+        <%- include('../includes/footer') %>
+            <%- include('../includes/foot') %>

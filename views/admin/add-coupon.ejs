@@ -1,0 +1,160 @@
+<%- include('../includes/admin/head') %>
+<%- include('../includes/admin/partials') %>
+
+<style>
+  .error{
+    color: red;
+    font-weight: 400;
+    margin: 0;
+  }
+</style>
+
+<section class="container">
+    <div class="row pt-4 px-3" style="border-radius: 10%;">
+        <h1 class="text-dark mb-4">Generate Coupon</h1>
+
+        <!-- form  -->
+
+        <div class="col"  style="background: whitesmoke;">
+            <form action="/admin/add-coupon" id="coupon-form" method="post">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-2">
+                            <label for="coupon-code" class="form-label">Coupon Code</label>
+                            <input type="text" class="form-control" id="coupon-code" name="couponCode" placeholder="generate code..." readonly>
+                          </div>
+                    </div>
+                    <div class="col-md-4 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-primary mb-0 mt-3" id="generate" type="button">Generate coupon code</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label for="discount" class="form-label">Discount Amount</label>
+                            <input type="text" class="form-control" id="discount" name="discount" placeholder="coupon price">
+                          </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label for="min-purchase" class="form-label">Minimum Purchase Amount</label>
+                            <input type="text" class="form-control" id="min-purchase" name="minPurchase" placeholder="minimum purchase amount">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label for="expires" class="form-control-label">Expires Date</label>
+                            <input class="form-control" type="date" id="expires" name="expires">
+                        </div>
+                    </div>
+                    <div class="col-md-6 radio-block">
+                        <p class="mt-3 mb-2 text-xs font-weight-bold" style="color: #344767;">Coupon Type</p>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="couponType" id="public-type" value="public">
+                            <label class="form-check-label" for="public-type">Public</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="couponType" id="private-type" value="private">
+                            <label class="form-check-label" for="private-type">Private</label>
+                        </div>   
+                    </div>
+                </div>
+                
+                  <div class="mb-2 d-flex justify-content-around">
+                    <a href="/admin/coupon" class="btn bg-gradient-warning w-50 mt-4 mb-0 me-2">Cancel</a>
+                    <button type="submit" class="btn bg-gradient-info w-50 mt-4 mb-0 ms-2">Submit</button>
+                  </div>
+
+            </form>
+        </div>
+    </div>
+
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script>
+
+
+$.validator.addMethod('negativeNum', function(value, element){
+  return Number(value) >= 0;
+}, 'enter a non-negative number')
+
+$.validator.addMethod('minBuy', function(value, element){
+    const dis = parseInt($('#discount').val());
+    const val = parseInt(value)
+    return val > dis
+}, 'minimum purchase amount can be greater than discount')
+
+$(document).ready(()=>{
+    $('#coupon-form').validate({
+        rules: {
+            couponCode: 'required',
+            discount: {
+                required: true,
+                number : true,
+                negativeNum: true
+            },
+            minPurchase: {
+                required: true,
+                number: true,
+                negativeNum: true,
+                minBuy: true
+            },
+            expires: {
+                required: true,
+                date: true
+            },
+            couponType: 'required'
+        },
+        messages: {
+            couponCode: 'Generate coupon code',
+            discount: {
+                required: 'Enter coupon amount',
+                number : 'Enter valid amount'
+            },
+            minPurchase: {
+                required: 'Enter minimum purchase amount',
+                number: 'Enter valid amount',
+            },
+            expires: {
+                required: 'Coupon expiry is mandatory',
+                date: 'Enter a valid date'
+            },
+            couponType: 'Select proper coupon type'
+        },
+        errorPlacement: function(error, element) {
+            if (element.attr('name') === 'couponType') {
+                error.appendTo(element.closest('.radio-block'));
+            }else{
+                // default error position
+                error.insertAfter(element);
+            }
+        },
+        submitHandler: (form) => {
+            form.submit()
+        }
+    })
+})
+
+const genBtn = document.getElementById('generate');
+const couponVal = document.getElementById('coupon-code');
+
+genBtn.addEventListener('click', ()=>{
+    $.ajax({
+        url: '/admin/generate-coupon',
+        method: 'put',
+        success: (res) => {
+            console.log(res);
+            couponVal.value = res.code
+            genBtn.disabled = true
+        },
+        error: (err) => {
+            console.error(err);
+        }
+    })
+})
+</script>
+
+<%- include('../includes/admin/foot') %>
