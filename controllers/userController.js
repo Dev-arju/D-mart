@@ -39,7 +39,7 @@ exports.signOut = (req, res) => {
 exports.postSignUp = async (req, res) => {
     try {
         const existMobile = await User.findOne({ mobileNumber: req.body.number })
-        const existEmail = await User.findOne({ mobileNumber: req.body.email })
+        const existEmail = await User.findOne({ email: req.body.email })
         if (existMobile || existEmail) {
             if(existMobile && existEmail){
                 req.session.userExists = 'Mobile and Email is already registered'
