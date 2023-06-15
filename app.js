@@ -42,7 +42,7 @@ app.use(session({
 
 // cache control
 app.use((req,res,next)=>{
-  res.header('cache-control','private,nocache,no-store,must revalidate')
+  res.header('cache-control','private,nocache,no-store')
   res.header('expurse','-1')
   res.header('parama','no-cache')
   next()
