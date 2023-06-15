@@ -77,10 +77,10 @@
 <section class="product-details spad">
     <div class="container">
         <div class="row">
-            <div class="col-lg-2 d-flex flex-column flex-wrap">
+            <div class="col-lg-2 d-flex justify-content-center flex-lg-column flex-wrap">
                 <% product.images.forEach(element => { %>
                     <img data-imgbigurl="img/product/details/product-details-2.jpg" data-imageId="/images/product/<%= element %>"
-                        src="/images/product/<%= element %>" class="subImage" onclick="changeImage(this)" style="height: 90px; width: 90px;margin-bottom: 20px;" alt="">
+                        src="/images/product/<%= element %>" class="subImage mx-2 mx-lg-0" onclick="changeImage(this)" style="height: 90px; width: 90px;margin-bottom: 20px;" alt="">
                 <% }) %>              
             </div>
             <div class="col-lg-5 col-md-5 d-flex align-items-center">
