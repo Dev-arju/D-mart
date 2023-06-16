@@ -20,6 +20,7 @@ router.get('/resend-otp',isAuth, otpController.resendOtp)
 
 /*  shop */
 router.get('/shop', productController.shop)
+router.get('/shop/filter', productController.shopFilter)
 
 /* profile */
 router.get('/profile', active, userController.getProfile)

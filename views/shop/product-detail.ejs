@@ -54,6 +54,8 @@
     }
 </style>
 
+<link rel="stylesheet" href="/stylesheets/css/magiczoomplus.css">
+<script src="/javascripts/magiczoomplus.js"></script>
 
 <!-- Breadcrumb Section Begin -->
 <!-- <section class="breadcrumb-section set-bg" data-setbg="img/breadcrumb.jpg">
@@ -86,8 +88,10 @@
             <div class="col-lg-5 col-md-5 d-flex align-items-center">
                 <div class="product__details__pic">
                     <div class="product__details__pic__item ">
-                        <img class="product__details__pic__item--large mg-fluid mx-auto" style="max-height: 550px;" id="mainImage" 
+                        <a href="/images/product/<%= product.images[0] %>" class="MagicZoom">
+                        <img class="product__details__pic__item--large mg-fluid mx-auto" style="object-fit: contain;"
                             src="/images/product/<%= product.images[0] %>" alt="<%= product.images[0] %>">
+                        </a>
                     </div>
                 </div>
             </div>
@@ -181,10 +185,18 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <script>
+    var mzOptions = {
+            zoomMode: 'zoom',
+            zoomPosition: 'right',
+            lazyZoom: 'true'
+        };
+
     function changeImage(element){
-        const mainImg = document.getElementById("mainImage")
-        const imagePath = element.getAttribute("data-imageId")
-        mainImg.setAttribute('src', imagePath)
+        var imagePath = element.getAttribute("data-imageId")
+        var magicZoomElement = document.querySelector('.MagicZoom')
+        var id = magicZoomElement.id
+
+        MagicZoom.update(id, imagePath, imagePath)
     }
 
     function addCart(productId){

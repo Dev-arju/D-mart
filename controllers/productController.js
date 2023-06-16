@@ -219,6 +219,18 @@ exports.productDetail = async (req, res) => {
 
 /* shop */
 exports.shop = async(req,res) => {
+    let minPrice = 0
+    let maxPrice = 0
+    await Product.find().sort({price: 1}).limit(1).then((doc) => {
+        if(doc.length > 0) {
+            minPrice = doc[0].price
+        }
+    })
+    await Product.find().sort({price: -1}).limit(1).then((doc) => {
+        if(doc.length > 0){
+            maxPrice = doc[0].price
+        }
+    })
     const cartCount = await getCartCount(req)
     const categories = await Category.find()
     const products = await Product.aggregate([
@@ -237,14 +249,31 @@ exports.shop = async(req,res) => {
         }
     ])
     
+    console.log(minPrice);
     res.render('shop/shop',{
         loggedIn: req.session.loggedIn,
         categories,
         products,
-        cartCount
+        cartCount,
+        minPrice,
+        maxPrice
     })
 }
 
+/* filter shop products */
+exports.shopFilter = async(req,res) => {
+    let {category, minPrice, maxPrice} = req.query
+    
+    if(category){
+        const selectedFilter = await Category.findOne({name: req.query.category});
+        const products = await Product.find({category: selectedFilter._id})
+        return res.json({products})
+    }else{
+        const products = await Product.find({price: {$gte: parseInt(minPrice), $lte: parseInt(maxPrice)}})
+        return res.json({products})
+    }
+    
+}
 
 
 //-- function for return cart count --//
