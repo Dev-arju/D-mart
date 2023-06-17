@@ -61,6 +61,7 @@ router.get('/orders', isLogged, orderController.getAdminOrders)
 router.get('/order-data', isLogged, orderController.loadOrderData)
 router.patch('/change-status', isLogged, orderController.changeStatus)
 router.get('/order-control', isLogged, orderController.orderControl)
+router.get('/order-detail/:id', isLogged, orderController.adminOrderDetails)
 
 router.get('/signin', notLogged, adminController.login)
 router.post('/signin', notLogged, adminController.postLogin)

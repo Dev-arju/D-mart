@@ -77,9 +77,9 @@
                             </td>`;
                     tableRows += `<td class="align-middle text-center">
                               
-                                <button  class="btn btn-sm bg-gradient-info ms-1 m-0 px-2 py-1 text-xxs">
+                                <a href="/admin/order-detail/${order._id}" class="btn btn-sm bg-gradient-info ms-1 m-0 px-2 py-1 text-xxs">
                                     Details
-                                </button>
+                                </a>
                             </td>`;
                     if(order.orderStatus === 'delivered' || order.orderStatus === 'cancelled'){
                         tableRows += `<td class="align-middle">
