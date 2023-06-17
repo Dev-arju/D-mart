@@ -103,14 +103,14 @@
                   <h6 class="my-0"><%= data.productName %> <span class="mx-2">&#8281;</span> <%= data.qty %></h6>
                   <!-- <small class="text-muted">Brief description</small> -->
                 </div>
-                <span class="text-muted">&#8377; <%= data.subTotal %></span>
+                <span class="text-muted">&#8377; <%= Math.floor(data.subTotal).toLocaleString() %></span>
               </li>
             <% }) %>
             
             
             <li class="list-group-item d-flex justify-content-between" id="total-block">
               <span><strong>Total Price</strong></span>
-              <strong id="total-field">&#8377; <%= totalAmount.toLocaleString() %></strong>
+              <strong id="total-field">&#8377; <%= Math.floor(totalAmount).toLocaleString() %></strong>
             </li>
           </ul>
           <!-- Cart -->

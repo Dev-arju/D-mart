@@ -3,12 +3,14 @@ const Cart = require('../models/cartModel')
 const Address = require('../models/addressModel')
 const Coupon = require('../models/couponModel')
 const Wallet = require('../models/walletModel')
+const Category = require('../models/categoryModel')
 
 // const Product = require('../controllers/productController')
 const ObjectId = require('mongoose').Types.ObjectId
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
 const { log } = require('console')
+const { products } = require('./productController')
 
 const instance = new Razorpay({
     key_id: process.env.KEY_ID,
@@ -546,6 +548,35 @@ exports.orderControl = async (req, res) => {
         })
         return res.status(200).json(result)
     }
+}
+
+/* GET order details admin */
+exports.adminOrderDetails = async(req,res) => {
+    const orderId = req.params.id
+    let deliveredAt = 'not updated'
+    let price = {
+        subTotal: 0,
+        total: 0
+    };
+
+    const order = await Order.findOne({_id: orderId})
+    .populate({path: 'products.item', model: 'Product', populate: { path: 'category', model: 'Category' }})
+    .populate({path: 'userId', model: 'User'})
+    .populate({path: 'promocodeApplied', model: 'Coupon'})
+    
+    if(order.orderStatus === 'delivered'){
+        deliveredAt = order.deliveredAt.toDateString()
+    }
+    order.products.forEach((product) => {
+        price['subTotal'] += product.subTotal
+    })
+    price.total = order.promocodeApplied ? price.subTotal - order.promocodeApplied.discount : price.subTotal
+    res.render('admin/order-detail', {
+        currPage: 'Orders',
+        order,
+        deliveredAt,
+        price
+    })   
 }
 
 /* GET Sales Report */

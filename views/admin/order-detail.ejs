@@ -1,0 +1,150 @@
+<%- include('../includes/admin/head') %>
+<%- include('../includes/admin/partials') %>
+
+<style>
+    .underline {
+        position: relative;
+    }
+
+    .underline:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 100%;
+        height: 1px;
+        background-color: black;
+    }
+</style>
+
+<main>
+    <section class="container" id="order-section">
+        <div class="row">
+            <div class="col bg-info py-2 mt-2">
+                <h4 class="text-white m-0">Order Information</h4>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6 d-flex">
+              <div class="row">
+                <div class="col-6 text-dark mb-2">User Name</div>
+                <div class="col-6 text-dark mb-2">: <%= order.userId.fullname %></div>
+                <div class="col-6 text-dark mb-2">Order Id</div>
+                <div class="col-6 text-dark mb-2">: <%= order._id %></div>
+                <div class="col-6 text-dark mb-2">Order Status</div>
+                <div class="col-6 text-dark mb-2">: <%= order.orderStatus %></div>
+                <div class="col-6 text-dark mb-2">Payment Status</div>
+                <div class="col-6 text-dark mb-2">: <%= order.paymentStatus %></div>
+                <div class="col-6 text-dark mb-2">Payment Method</div>
+                <div class="col-6 text-dark mb-2 text-uppercase">: <%= order.paymentMethod %></div>
+                <div class="col-6 text-dark mb-2">Applied Coupon</div>
+                <% if (order.promocodeApplied) { %>
+                    <div class="col-6 text-dark mb-2">: <%= order.promocodeApplied.couponCode %></div>
+                <% } else { %>
+                    <div class="col-6 text-dark mb-2">: no coupon applied</div>
+                <% } %>
+                <div class="col-6 text-dark mb-2">Delivered Date</div>
+                <div class="col-6 text-dark mb-2">: <%= deliveredAt %></div>
+              </div>
+            </div>
+            <div class="col-md-6 p-4" style="border-radius: 18px;background: rgb(0, 0, 0);">
+                <div class="row">
+                    <div class="col text-center py-2" style="border-radius: 18px;background: silver;">
+                        <h4 class="m-0 text-dark">Delivery Details</h4>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6 text-white mb-2">Full Name</div>
+                    <div class="col-6 text-white mb-2">: <%= order.deliveryDetails.firstName + " " + order.deliveryDetails.lastName %></div>
+                    <div class="col-6 text-white mb-2">email</div>
+                    <% if (order.deliveryDetails.email) { %>
+                        <div class="col-6 text-white mb-2">: <%= order.deliveryDetails.email %></div>
+                    <% } %>
+                    <div class="col-6 text-white mb-2">phone</div>
+                    <div class="col-6 text-white mb-2">: +91 <%= order.deliveryDetails.phone %></div>
+                    <div class="col-6 text-white mb-2">Address</div>
+                    <div class="col-6 text-white mb-2">: <%= order.deliveryDetails.address %></div>
+                    <div class="col-6 text-white mb-2">Country / State</div>
+                    <div class="col-6 text-white mb-2">: <%= order.deliveryDetails.country + ", " + order.deliveryDetails.state %></div>
+                    <div class="col-6 text-white mb-2">Address Type</div>
+                    <div class="col-6 text-white text-uppercase mb-2">: <%= order.deliveryDetails.addressType %></div>
+                  </div>
+            </div>
+        </div>
+    </section>
+    <section id="product-section" class="container">
+        <div class="row">
+            <div class="col bg-info py-2 mt-2 border border-rounded ">
+                <h4 class="text-white m-0">Price Information</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead>
+                      <tr>
+                        <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7">Product</th>
+                        <th class="text-uppercase text-dark text-xs font-weight-bolder opacity-7 ps-2">Category</th>
+                        <th class="text-center text-uppercase text-dark text-xs font-weight-bolder opacity-7">Quantity</th>
+                        <th class="text-center text-uppercase text-dark text-xs font-weight-bolder opacity-7">Price</th>
+                        <th class="text-center text-uppercase text-dark text-xs font-weight-bolder opacity-7">Sub Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <% order.products.forEach(product => { %>
+                            <tr>
+                                <td>
+                                  <div class="d-flex px-2 py-1">
+                                    <div>
+                                      <img src="/images/product/<%= product.item.images[0] %>" class="avatar avatar-sm me-3">
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-center">
+                                      <h6 class="mb-0 text-xs"><%= product.item.productName %></h6>
+                                      <p class="text-xs text-secondary mb-0"><%= product.item.company %></p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <p class="text-xs font-weight-bold mb-0"><%= product.item.category.name %></p>
+                                </td>
+                                <td class="align-middle text-center">
+                                  <span class="text-secondary text-xs font-weight-bold"><%= product.qty %></span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="text-secondary text-xs font-weight-bold">
+                                        <%=  Math.floor(product.item.price - (product.item.price * (product.item.deal / 100))).toLocaleString() %>
+                                    </span>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <span class="text-secondary text-xs font-weight-bold"><%= product.subTotal.toLocaleString() %></span>
+                                </td>
+                              </tr>
+                        <% }) %>
+                      
+              
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+        </div>
+        <div class="row">
+            <div class="d-flex flex-column px-5 m2-5 bg-white py-4 border rounded shadow">
+                <div class="ms-auto text-dark h4">Sub Total: &#8377; <span><%= price.subTotal.toLocaleString() %></span></div>
+                <% if (order.promocodeApplied) { %>
+                    <div class="ms-auto text-success h4">Discount: &#8377; <span><%= order.promocodeApplied.discount %></span></div>
+                <% } %>
+                <span class="underline"></span>
+                <div class="ms-auto text-danger text-md font-weight-bold h2">Total: &#8377; <span><%= price.total.toLocaleString() %></span></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center mt-2">
+                <button class="btn btn-sm btn-info" onclick="location.replace('/admin/orders')">Back to orders</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<%- include('../includes/admin/foot') %>
