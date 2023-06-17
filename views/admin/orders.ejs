@@ -84,7 +84,8 @@
                     if(order.orderStatus === 'delivered' || order.orderStatus === 'cancelled'){
                         tableRows += `<td class="align-middle">
                                 <div class="dropdown">
-                                  <button disabled class="btn btn-link text-secondary dropdown-toggle m-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button disabled class="btn btn-link text-secondary dropdown-toggle m-0" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Order Action completed" style="pointer-events: auto; cursor: pointer;">
                                       <i class="fa fa-ellipsis-v text-xs" aria-hidden="true"></i>
                                   </button>
                                   <ul class="dropdown-menu dropdown-menu-end">
@@ -97,7 +98,8 @@
                     }else{
                         tableRows += `<td class="align-middle">
                                 <div class="dropdown">
-                                  <button class="btn btn-link text-secondary dropdown-toggle m-0 status-btn" type="button"  data-bs-toggle="dropdown" aria-expanded="false">
+                                  <button class="btn btn-link text-secondary dropdown-toggle m-0 status-btn" type="button"  data-bs-toggle="dropdown" aria-expanded="false"
+                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Order Actions">
                                       <i class="fa fa-ellipsis-v text-xs" aria-hidden="true"></i>
                                   </button>
                                   <ul class="dropdown-menu dropdown-menu-end">
