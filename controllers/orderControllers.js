@@ -109,17 +109,22 @@ exports.placeOrder = async (req, res) => {
     }
     const cartId = req.params.id
     const couponId = req.query.promo
-
-    const { firstName, lastName, email, phone, address, apartment, country, state, postcode, addressType, paymentMethod, saveInfo } = req.body
-    const products = await getCartItems(cartId)
-    let total = 0
+    let products
     let appliedCoupon
     let orderId
-    console.log(appliedCoupon);
+    let total = 0
+
+    const { firstName, lastName, email, phone, address, apartment, country, state, postcode, addressType, paymentMethod, saveInfo } = req.body
+    try {
+        products = await getCartItems(cartId)
+    } catch (error) {
+        console.log(error);
+        return res.redirect('/')
+    }
     products.forEach(product => {
         total += product.subTotal
     })
-    if (couponId) {
+    if (couponId !== "null") {
         appliedCoupon = await Coupon.findById(couponId)
         total = total - appliedCoupon.discount
     }
