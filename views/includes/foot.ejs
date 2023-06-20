@@ -10,6 +10,8 @@
 <script src="/javascripts/js/owl.carousel.min.js"></script>
 <script src="/javascripts/js/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <script>
   jQuery.validator.addMethod("noSpace", function (value, element) {
@@ -141,6 +143,148 @@
     }
   })
 
+  $('#reset-password-form').validate({
+    rules: {
+      number: {
+        number: true,
+        required: true,
+        minlength: 10,
+        maxlength: 10
+      }
+    },
+    messages: {
+      number: {
+        number: "Valid only digits",
+        required: 'Enter registered mobile number',
+        minlength: 'Enter a valid 10 digit mobile number',
+        maxlength: 'Enter a valid 10 digit mobile number'
+      }
+    },
+    errorPlacement: function (error, element) {
+      if (element.attr('name') === 'number') {
+        // Adjust the error message position for addressType and paymentMethod fields
+        error.appendTo(element.closest('.form-group'));
+      } else {
+        // Default error message placement for other fields
+        error.insertAfter(element);
+      }
+    },
+    submitHandler: (form) => {
+      var mobNum = $('#mobile').val()
+      $.ajax({
+        url: '/reset-password',
+        method: 'post',
+        data: {mobNum},
+        success: (res) => {
+          if(res){
+            $(form).find('button[type="submit"]').remove()
+            $('#mobile').prop('readonly', true)
+            $('#otp-field').removeClass('d-none').addClass('d-flex')
+          }else{
+            Swal.fire({
+              title: 'User Not Found',
+              text: 'Given mobile number is not registered',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Register Now'
+            }).then(result => {
+              if(result.isConfirmed){
+                location.replace('/signup')
+              }
+            })
+          }
+        }
+      })
+    }
+  })
+
+
+  $('#otp-field').find('button').click(() => {
+    var otpRegx = /^\d{6}$/;
+    var otp = $('#confirm-otp').val();
+    var mobNum = $('#mobile').val();
+    var errorField = $('#otp-error');
+
+    if(otpRegx.test(otp)){
+      $(errorField).addClass('d-none');
+      $.ajax({
+        url: '/reset-password/verify',
+        method: 'post',
+        data: {otp, mobNum},
+        success: (res) => {
+          if(res){
+            $('#reset-password-form').remove()
+            $('#otp-field').removeClass('d-flex').addClass('d-none')
+            var newPassForm = newPasswordHTML(res._id)
+            $('#page-wrapper').after(newPassForm)
+          }else{
+            $(errorField).removeClass('d-none');
+          }
+        }
+      })
+
+    }else{
+      $(errorField).removeClass('d-none');
+    };
+  });
+
+  function newPasswordHTML(id){
+    var newhtml = `
+    <form action="/new-password" method="post" id="set-password">
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <input type="password" class="form-control" name="newPassword" placeholder="Enter new password">
+          <input type="text" class="form-control" value="${id}" name="userId" hidden>
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm new password">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>`
+    return newhtml
+  }
+
+  $(document).on("submit", "#set-password", function(e) {
+    e.preventDefault(); // Prevent the form from submitting normally
+    $.validator.addMethod("strongPassword",function(value, element) {
+        return this.optional(element) || /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,16}$/.test(value);
+      },
+      "Password must contain uppercase, smallercase letters and digits and be 6 to 16 characters long"
+    );
+
+    // Perform form validation
+    $(this).validate({
+      rules: {
+        newPassword: {
+          required: true,
+          strongPassword: true 
+        },
+        confirmPassword: {
+          required: true,
+          equalTo: "[name='newPassword']",
+        },
+      },
+      messages: {
+        newPassword: {
+          required: "Please enter a new password"
+        },
+        confirmPassword: {
+          required: "Please confirm your new password",
+          equalTo: "Passwords do not match",
+        },
+      },
+      submitHandler: function(form) {
+        // Form submission logic here
+        form.submit(); // Submit the form
+      },
+    });
+
+    // Trigger validation
+    if ($(this).valid()) {
+      $(this).submit()
+    }
+  });
 
 </script>
 

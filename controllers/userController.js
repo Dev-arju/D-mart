@@ -2,17 +2,19 @@ const bcrypt = require('bcrypt')
 const User = require('../models/userModel')
 const Cart = require('../models/cartModel')
 const Wallet = require('../models/walletModel')
+const twilio = require('../config/twilio')
 const ObjectId = require('mongoose').Types.ObjectId
 
 
 exports.signIn = (req, res) => {
 
     res.render('shop/signin', {
-        success: req.session.newUser,
+        success: req.session.newUser || req.session.newPassword,
         logginErr: req.session.logginErr
     })
     req.session.newUser = false
     req.session.logginErr = false
+    req.session.newPassword = false
     req.session.save()
 }
 
@@ -34,6 +36,50 @@ exports.signOut = (req, res) => {
         req.session.save()
         res.redirect('/')
     }
+}
+
+exports.getResetPassword = async(req,res) => {
+    res.render('shop/reset-password')
+}
+
+exports.postResetPassword = async(req,res) => {
+    const { mobNum } = req.body
+    const user = await User.findOne({mobileNumber: parseInt(mobNum)})
+    if(user){
+        twilio.sendotp(mobNum)
+        res.json(user)
+    }else{
+        res.json(false)
+    }
+}
+
+exports.postVerifyResetPass = async(req,res) => {
+    const { otp , mobNum } = req.body
+    const verify = await twilio.verifyotp(otp, mobNum)
+    
+    if(verify){
+        const user = await User.findOne({mobileNumber: parseInt(mobNum)})
+        res.json(user)
+    }else{
+        res.json(false)
+    }
+    
+}
+
+exports.setNewPassword = async(req,res) => {
+    const { newPassword , userId } = req.body
+    if(newPassword && userId){
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        await User.updateOne(
+            {_id: userId},
+            {$set : {password: hashedPassword}}
+        )
+        req.session.newPassword = "your password has been changed"
+        res.redirect('/signin')
+    }else{
+        req.session.newPassword = "error occured update password"
+        res.redirect('/signin')
+    }    
 }
 
 exports.postSignUp = async (req, res) => {
