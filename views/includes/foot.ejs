@@ -118,7 +118,7 @@
       },
       submitHandler: function (form) {
         event.preventDefault()
-        const couponId = $('#coupon-list').data('id')
+        const couponId = $('#coupon-list').data('id') || null
         const cartId = $(form).attr('data-cartId')
         var formData = $(form).serializeArray();
 
