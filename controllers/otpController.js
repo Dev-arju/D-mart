@@ -1,5 +1,4 @@
 const User = require('../models/userModel')
-const Otp = require('../models/otpModel')
 const Wallet = require('../models/walletModel')
 const twilio = require('../config/twilio')
 const ObjectId = require('mongoose').Types.ObjectId;
@@ -14,7 +13,7 @@ exports.postOtpSignIn = async (req, res) => {
             if (response) {
                 if (response.isActive) {
                     req.session.userId = response._id
-                    twilio.sending(req.body.number)
+                    twilio.sendotp(req.body.number)
                     res.render('shop/otp-verify')
                 } else {
                     req.session.logginErr = 'your account has been blocked contact customer care'
@@ -41,31 +40,28 @@ exports.postVerifyOtp = async (req, res) => {
     const otp = num1 + num2 + num3 + num4 + num5 + num6;
 
     User.findOne({ _id: new ObjectId(req.session.userId) })
-        .then((user) => {
-            if (user) {
-                Otp.findOne({ mob: user.mobileNumber })
-                    .then(async(doc) => {
-                        if (doc && doc.otp == otp) {
-                            const found = await Wallet.findOne({ userId: user._id });
-                            if (!found) {
-                                await Wallet.create({
-                                    userId: user._id,
-                                    coins: 0
-                                });
-                            }
-
-                            req.session.user = user
-                            req.session.loggedIn = true
-                            req.session.userId = null
-                            res.redirect('/')
-                        } else {
-                            res.render('shop/otp-verify', {
-                                invalid: 'otp expired or invalid otp'
-                            })
-                        }
-                    }).catch((err) => console.log(err))
-            }
-        })
+    .then(async(user) => {
+        if (user) {
+            const verify = await twilio.verifyotp(otp, user.mobileNumber)
+            if(verify){
+                const found = await Wallet.findOne({ userId: user._id });
+                if (!found) {
+                    await Wallet.create({
+                        userId: user._id,
+                        coins: 0
+                    });
+                }
+                req.session.user = user
+                req.session.loggedIn = true
+                req.session.userId = null
+                res.redirect('/')
+            }else{
+                res.render('shop/otp-verify', {
+                    invalid: 'otp expired or invalid otp'
+                })
+            }   
+        }
+    })
 }
 
 exports.resendOtp = (req, res) => {
@@ -73,7 +69,7 @@ exports.resendOtp = (req, res) => {
         User.findOne({ _id: new ObjectId(req.session.userId) })
             .then((user) => {
                 if (user) {
-                    twilio.sending(user.mobileNumber)
+                    twilio.sendotp(user.mobileNumber)
                     res.render('shop/otp-verify', {
                         invalid: 'Otp has been sent'
                     })

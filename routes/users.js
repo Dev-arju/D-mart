@@ -17,6 +17,10 @@ router.get('/signin-otp',isAuth, otpController.signinOtp)
 router.get('/signup',isAuth, userController.signUp)
 router.get('/signout', userController.signOut)
 router.get('/resend-otp',isAuth, otpController.resendOtp)
+router.get('/reset-password', isAuth, userController.getResetPassword)
+router.post('/reset-password', isAuth, userController.postResetPassword)
+router.post('/reset-password/verify', isAuth, userController.postVerifyResetPass)
+router.post('/new-password', isAuth, userController.setNewPassword)
 
 /*  shop */
 router.get('/shop', productController.shop)
