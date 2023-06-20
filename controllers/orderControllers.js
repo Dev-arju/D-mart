@@ -26,7 +26,6 @@ exports.getOrders = async (req, res) => {
         path: 'products.item',
         model: 'Product'
     }).sort({ createdAt: -1 });
-    console.log(myOrder);
 
     res.render('shop/orders', {
         loggedIn: req.session.loggedIn,
