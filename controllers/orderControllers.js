@@ -9,10 +9,8 @@ const Category = require('../models/categoryModel')
 const ObjectId = require('mongoose').Types.ObjectId
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
-const { log } = require('console')
-const { products } = require('./productController')
 
-const instance = new Razorpay({
+let instance = new Razorpay({
     key_id: process.env.KEY_ID,
     key_secret: process.env.KEY_SECRET,
 });
@@ -109,8 +107,8 @@ exports.placeOrder = async (req, res) => {
     const cartId = req.params.id
     const couponId = req.query.promo
     let products
-    let appliedCoupon
     let orderId
+    let appliedCoupon = 0
     let total = 0
 
     const { firstName, lastName, email, phone, address, apartment, country, state, postcode, addressType, paymentMethod, saveInfo } = req.body
@@ -145,7 +143,7 @@ exports.placeOrder = async (req, res) => {
             userId: req.session.user._id,
             paymentMethod: paymentMethod,
             products: products,
-            promocodeApplied: appliedCoupon !== undefined ? appliedCoupon._id : null,
+            promocodeApplied: appliedCoupon ? appliedCoupon._id : null,
             orderAmount: total,
             paymentStatus: paymentMethod === "pg" ? "processing" : "pending",
             orderStatus: (paymentMethod === 'cod') ? 'placed' : 'pending'
@@ -206,12 +204,12 @@ exports.placeOrder = async (req, res) => {
         res.json({ orderPlaced: true, orderId })
     } else if (paymentMethod === "pg") {
         var options = {
-            amount: total * 100,  // amount in the smallest currency unit
+            amount: parseInt(total * 100),  // amount in the smallest currency unit
             currency: "INR",
             receipt: `${orderId}`
         };
         instance.orders.create(options, function (err, order) {
-            if (err) console.log("error on creating order: " + err);
+            if (err) console.log(err);
             res.json({ order })
         });
     }
@@ -229,57 +227,55 @@ exports.postPlaceOrderExist = async (req, res) => {
     const { formData, couponId } = req.body;
     const { value: addressId } = formData.find(data => data.name === 'addressId');
     const { value: paymentMethod } = formData.find(data => data.name === 'paymentMethod');
-
     let orderId;
-    let address = await getShippingAddress(req.session.user._id, addressId)
-    address = address[0]
-    const products = await getCartItems(cartId);
-    let appliedCoupon, newOrder;
-
     let total = 0
+    let appliedCoupon = 0
+    let products
+
+    let address = await getShippingAddress(req.session.user._id, addressId)
+        address = address[0]
+    try {
+        products = await getCartItems(cartId)
+    } catch (error) {
+        console.log(error);
+        return res.redirect('/')
+    }
     products.forEach(product => {
         total += product.subTotal
     })
-
-
-    if (couponId) {
+    
+    if (couponId !== undefined) {
         appliedCoupon = await Coupon.findById(couponId)
-        newOrder = new Order({
+        total = total - appliedCoupon.discount
+    }
+        const newOrder = new Order({
             deliveryDetails: address.available,
             userId: req.session.user._id,
             paymentMethod: paymentMethod,
             products: products,
-            promocodeApplied: couponId,
-            orderAmount: total - appliedCoupon.discount,
-            paymentStatus: paymentMethod === "pg" ? "processing" : "pending",
-            orderStatus: (paymentMethod === 'cod') ? 'placed' : 'pending'
-        })
-    } else {
-        newOrder = new Order({
-            deliveryDetails: address.available,
-            userId: req.session.user._id,
-            paymentMethod: paymentMethod,
-            products: products,
+            promocodeApplied: appliedCoupon ? appliedCoupon._id : null,
             orderAmount: total,
             paymentStatus: paymentMethod === "pg" ? "processing" : "pending",
             orderStatus: (paymentMethod === 'cod') ? 'placed' : 'pending'
         })
-    }
-
-    await Order.create(newOrder).then(async (order) => {
-        orderId = order._id
-    })
+        await Order.create(newOrder).then(async (order) => {
+            orderId = order._id
+        })
+    
     if (paymentMethod === "cod") {
         await Cart.deleteOne({ _id: new ObjectId(cartId) })
         res.json({ orderPlaced: true, orderId })
     } else if (paymentMethod === "pg") {
         var options = {
-            amount: couponId !== undefined ? (total - appliedCoupon.discount) * 100 : total * 100,  // amount in the smallest currency unit
+            amount: parseInt(total * 100),  // amount in the smallest currency unit
             currency: "INR",
             receipt: `${orderId}`
         };
         instance.orders.create(options, function (err, order) {
-            if (err) console.log("error on creating order: " + err);
+            if (err) {
+                console.log(err);
+                return res.json({err})
+            }
             res.json({ order })
         });
     } else {
