@@ -289,7 +289,7 @@
                   <div class="row">
                     <div class="col-lg-6">
                       <h3 class="h6">Payment Method</h3>
-                      <p>${order.paymentMethod == 'pg' ? 'online' : 'COD'}<br>
+                      <p>${order.paymentMethod}<br>
                       Total: &#8377; ${total}
                       <span class="badge badge-info">${order.paymentStatus == "success" ? 'PAID' : 'Payment Pending'}</span>
                       </p>

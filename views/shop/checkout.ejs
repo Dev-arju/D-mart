@@ -224,7 +224,7 @@ $('#orderForm').validate({
         }else if(response.err){
           return Swal.fire({
             title: 'Transaction Failed',
-            text: 'contact technical support',
+            text: response.err,
             icon: 'warning'
           })
         }
